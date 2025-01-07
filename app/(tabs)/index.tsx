@@ -1,74 +1,196 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, ScrollView, Pressable } from 'react-native';
+import { Link } from 'expo-router';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <ThemedView style={styles.container}>
+      {/* Navigation Bar */}
+      <ThemedView style={styles.navbar}>
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={require('@/assets/images/python-logo.png')}
+          style={styles.navLogo}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        <Link href="/sign-in" asChild>
+          <Pressable style={styles.signInButton} accessibilityLabel="Sign In">
+            <ThemedText style={styles.signInText}>Sign In</ThemedText>
+          </Pressable>
+        </Link>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+      {/* Main Content */}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <ThemedView style={styles.content}>
+          {/* Hero Section */}
+          <ThemedView style={styles.heroSection}>
+            <ThemedText style={styles.mainTitle}>Belajar Python</ThemedText>
+            <ThemedText style={styles.subTitle}>Sekarang!</ThemedText>
+            <ThemedText style={styles.description}>
+              Learn Python in a simple and enjoyable way, one step at a time,{'\n'}
+              and boost your skills in just a few minutes each day.
+            </ThemedText>
+          </ThemedView>
+
+          {/* Image Grid */}
+          <ThemedView style={styles.imageGrid}>
+            <Image
+              source={require('@/assets/images/python-logo-large.png')}
+              style={styles.pythonLogo}
+            />
+            <ThemedView style={styles.smallImagesContainer}>
+              <Image
+                source={require('@/assets/images/code-sample-1.png')}
+                style={styles.smallImage}
+              />
+              <ThemedView style={styles.smallerImagesContainer}>
+                <Image
+                  source={require('@/assets/images/code-sample-2.png')}
+                  style={styles.smallerImage}
+                />
+                <Image
+                  source={require('@/assets/images/developer.png')}
+                  style={styles.smallerImage}
+                />
+              </ThemedView>
+            </ThemedView>
+            <Image
+              source={require('@/assets/images/workspace.png')}
+              style={styles.smallImage}
+            />
+            <Image
+              source={require('@/assets/images/code-sample-2.png')}
+              style={styles.smallImage}
+            />
+          </ThemedView>
+        </ThemedView>
+
+        {/* Footer */}
+        <ThemedView style={styles.footer}>
+          <ThemedText style={styles.footerText}>
+            Made by Jason Jahja (18222116) - Anindita Widya Santoso (18222128)
+          </ThemedText>
+        </ThemedView>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  navbar: {
     position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 48,
+    paddingVertical: Platform.OS === 'ios' ? 48 : 16,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 1000,
+  },
+  navLogo: {
+    width: 54,
+    height: 54,
+    resizeMode: 'contain',
+  },
+  signInButton: {
+    backgroundColor: '#3178C6',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  signInText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    paddingTop: Platform.OS === 'ios' ? 96 : 64, // Account for navbar height
+  },
+  content: {
+    flex: 1,
+    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    padding: 54,
+    gap: 32,
+  },
+  heroSection: {
+    flex: 3,
+    justifyContent: 'center',
+  },
+  mainTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 24,
+  },
+  subTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#3178C6',
+    marginBottom: 24,
+  },
+  description: {
+    fontSize: 20,
+    color: '#333',
+    lineHeight: 28,
+  },
+  imageGrid: {
+    flex: 2,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    alignItems: 'flex-start',
+  },
+  pythonLogo: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+  },
+  smallImagesContainer: {
+    flexDirection: 'column',
+    gap: 16,
+    justifyContent: 'center',
+  },
+  smallerImagesContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'flex-start',
+  },
+  smallImage: {
+    width: 200,
+    height: 100,
+    resizeMode: 'cover',
+    borderRadius: 8,
+  },
+  smallerImage: {
+    width: '48%',
+    height: 72,
+    aspectRatio: 1 / 2,
+    resizeMode: 'cover',
+    borderRadius: 8,
+  },
+  footer: {
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 14,
   },
 });
