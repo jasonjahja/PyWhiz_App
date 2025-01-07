@@ -28,7 +28,7 @@ export default function HomeScreen() {
             <ThemedText style={styles.mainTitle}>Belajar Python</ThemedText>
             <ThemedText style={styles.subTitle}>Sekarang!</ThemedText>
             <ThemedText style={styles.description}>
-              Learn Python in a simple and enjoyable way, one step at a time,{'\n'}
+              Learn Python in a simple and enjoyable way, one step at a time,
               and boost your skills in just a few minutes each day.
             </ThemedText>
           </ThemedView>
@@ -39,30 +39,26 @@ export default function HomeScreen() {
               source={require('@/assets/images/python-logo-large.png')}
               style={styles.pythonLogo}
             />
+
             <ThemedView style={styles.smallImagesContainer}>
+              {/* Smaller Images */}
               <Image
                 source={require('@/assets/images/code-sample-1.png')}
                 style={styles.smallImage}
               />
-              <ThemedView style={styles.smallerImagesContainer}>
-                <Image
-                  source={require('@/assets/images/code-sample-2.png')}
-                  style={styles.smallerImage}
-                />
-                <Image
-                  source={require('@/assets/images/developer.png')}
-                  style={styles.smallerImage}
-                />
-              </ThemedView>
+              <Image
+                source={require('@/assets/images/code-sample-2.png')}
+                style={styles.smallImage}
+              />
+              <Image
+                source={require('@/assets/images/workspace.png')}
+                style={styles.smallImage}
+              />
+              <Image
+                source={require('@/assets/images/developer.png')}
+                style={styles.smallImage}
+              />
             </ThemedView>
-            <Image
-              source={require('@/assets/images/workspace.png')}
-              style={styles.smallImage}
-            />
-            <Image
-              source={require('@/assets/images/code-sample-2.png')}
-              style={styles.smallImage}
-            />
           </ThemedView>
         </ThemedView>
 
@@ -91,6 +87,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 48,
+    paddingTop: 48,
     paddingVertical: Platform.OS === 'ios' ? 48 : 16,
     backgroundColor: '#fff',
     shadowColor: '#000',
@@ -120,69 +117,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollViewContent: {
-    paddingTop: Platform.OS === 'ios' ? 96 : 64, // Account for navbar height
+    paddingTop: 124,
   },
   content: {
     flex: 1,
-    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
-    padding: 54,
-    gap: 32,
+    flexDirection: 'column',
+    padding: 32,
+    gap: 72,
   },
   heroSection: {
     flex: 3,
     justifyContent: 'center',
   },
   mainTitle: {
-    fontSize: 48,
+    fontSize: 42,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 24,
+    lineHeight: 52,
   },
   subTitle: {
     fontSize: 48,
     fontWeight: 'bold',
     color: '#3178C6',
-    marginBottom: 24,
+    marginBottom: 18,
+    lineHeight: 52,
   },
   description: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#333',
-    lineHeight: 28,
+    lineHeight: 24,
   },
   imageGrid: {
-    flex: 2,
+    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 16,
-    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   pythonLogo: {
-    width: 200,
-    height: 200,
+    width: '100%',
+    height: 100,
     resizeMode: 'contain',
-  },
-  smallImagesContainer: {
-    flexDirection: 'column',
-    gap: 16,
-    justifyContent: 'center',
-  },
-  smallerImagesContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'flex-start',
+    marginBottom: 32,
   },
   smallImage: {
-    width: 200,
-    height: 100,
+    width: '48%',
+    height: 150,
     resizeMode: 'cover',
     borderRadius: 8,
   },
-  smallerImage: {
-    width: '48%',
-    height: 72,
-    aspectRatio: 1 / 2,
-    resizeMode: 'cover',
-    borderRadius: 8,
+  smallImagesContainer: {
+    flex: 2,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'space-between',
+    width: '100%',
   },
   footer: {
     padding: 16,
