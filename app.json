@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "LinguaLab",
-    "slug": "LinguaLab",
+    "name": "PyWhiz",
+    "slug": "PyWhiz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
