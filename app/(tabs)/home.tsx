@@ -6,14 +6,14 @@ import { useRouter } from 'expo-router';
 import Navbar from '@/components/ui/Navbar';
 
 export default function HomePage() {
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const router = useRouter();
 
   // Fetch the user's email from Firebase Auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setEmail(user.email || ''); // Set the email if the user is logged in
+        setName(user.displayName || 'Guest'); // Set the email if the user is logged in
       } else {
         // Redirect to login if no user is logged in
         router.replace('/login');
@@ -33,7 +33,7 @@ export default function HomePage() {
 
       <View style={styles.content}>
         {/* Greeting Section */}
-        <Text style={styles.greeting}>Hi, {email}</Text>
+        <Text style={styles.greeting}>Hi, {name}</Text>
 
         {/* Main Heading */}
         <Text style={styles.mainTitle}>Mulai Belajar Sekarang!</Text>

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, Alert, TouchableOpacity } from 'react-native';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'; // Add updateProfile for setting the displayName
 import { auth } from '../firebase';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const [name, setName] = useState(''); // Add state for name
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,7 +17,7 @@ export default function RegisterScreen() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const handleRegister = async () => {
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill out all fields.');
       return;
     }
@@ -29,7 +30,18 @@ export default function RegisterScreen() {
     setLoading(true);
 
     try {
+      // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Update the user's display name
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+      } else {
+        throw new Error('No user is currently signed in.');
+      }
+
       console.log('User registered:', userCredential.user);
       Alert.alert('Success', 'Account created successfully!');
       router.replace('(tabs)/home');
@@ -44,6 +56,14 @@ export default function RegisterScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
+      {/* Name Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
+      {/* Email Input */}
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -52,6 +72,7 @@ export default function RegisterScreen() {
         autoCapitalize="none"
         keyboardType="email-address"
       />
+      {/* Password Input */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -71,6 +92,7 @@ export default function RegisterScreen() {
           />
         </TouchableOpacity>
       </View>
+      {/* Confirm Password Input */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -115,7 +137,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     position: 'relative',
-    marginTop: 8,
   },
   input: {
     width: '100%',
@@ -124,6 +145,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     backgroundColor: '#fff',
+    marginBottom: 8,
   },
   icon: {
     position: 'absolute',

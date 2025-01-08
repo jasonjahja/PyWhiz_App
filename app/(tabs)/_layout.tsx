@@ -27,7 +27,7 @@ export default function Layout() {
     >
       {/* Define individual screens */}
       <Stack.Screen name="home" options={{ title: 'Home' }} />
-      <Stack.Screen name="explore" options={{ title: 'Explore' }} />
+      <Stack.Screen name="profile" options={{ title: 'Profile' }} />
     </Stack>
   );
 }

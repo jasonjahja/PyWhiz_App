@@ -48,20 +48,6 @@ export default function Navbar() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setIsAuthenticated(false);
-      toggleSidebar();
-  
-      router.replace('/');
-      console.log('User signed out and redirected to index');
-    } catch (error) {
-      console.error('Logout error:', error.message);
-      alert('Failed to log out. Please try again.');
-    }
-  };
-
   return (
     <View>
       {/* Navbar */}
@@ -112,9 +98,6 @@ export default function Navbar() {
                 <Text style={styles.sidebarItem}>Profile</Text>
               </TouchableOpacity>
             </Link>
-            <TouchableOpacity onPress={handleLogout}>
-              <Text style={styles.sidebarItem}>Logout</Text>
-            </TouchableOpacity>
           </View>
         </Animated.View>
       )}
