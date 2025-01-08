@@ -59,7 +59,7 @@ export default function Navbar() {
         {isAuthenticated ? (
           // Hamburger Icon for Authenticated User
           <TouchableOpacity onPress={toggleSidebar} style={styles.iconContainer}>
-            <Icon name="menu-outline" size={28} color="#3178C6" />
+            <Icon name="menu-outline" size={28} color="#333" />
           </TouchableOpacity>
         ) : (
           // Login Button for Unauthenticated User
@@ -86,11 +86,6 @@ export default function Navbar() {
             <Link href="/module" asChild>
               <TouchableOpacity onPress={toggleSidebar}>
                 <Text style={styles.sidebarItem}>Module</Text>
-              </TouchableOpacity>
-            </Link>
-            <Link href="/quiz" asChild>
-              <TouchableOpacity onPress={toggleSidebar}>
-                <Text style={styles.sidebarItem}>Quiz</Text>
               </TouchableOpacity>
             </Link>
             <Link href="/profile" asChild>
@@ -150,7 +145,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     width: '65%',
-    backgroundColor: '#3178C6',
+    backgroundColor: '#333',
     padding: 24,
     zIndex: 2000,
     height: height,

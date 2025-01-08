@@ -45,7 +45,7 @@ export default function RegisterScreen() {
       console.log('User registered:', userCredential.user);
       Alert.alert('Success', 'Account created successfully!');
       router.replace('(tabs)/home');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error.message);
       Alert.alert('Error', error.message || 'Failed to register.');
     } finally {

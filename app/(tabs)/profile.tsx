@@ -70,14 +70,27 @@ export default function ProfileScreen() {
     }
   };  
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      Alert.alert('Success', 'You have been logged out.');
-      router.replace('/login');
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to log out.');
-    }
+  const handleLogout = () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut(auth);
+              Alert.alert('Success', 'You have been logged out.');
+              router.replace('/login');
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'Failed to log out.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleDeleteAccount = () => {
@@ -98,7 +111,7 @@ export default function ProfileScreen() {
               } else {
                 throw new Error('No user is currently signed in.');
               }
-            } catch (error) {
+            } catch (error: any) {
               Alert.alert('Error', error.message || 'Failed to delete account.');
             }
           },
@@ -188,11 +201,11 @@ export default function ProfileScreen() {
 
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
-                        <Text style={styles.saveButtonText}>Save Changes</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                         <Text style={styles.logoutButtonText}>Logout</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
+                        <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -228,11 +241,11 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 24,
+    marginBottom: 48,
     textAlign: 'center',
   },
   form: {
-    marginBottom: 24,
+    marginBottom: 98,
   },
   label: {
     fontSize: 14,
@@ -255,7 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
-    marginBottom: 16,
+    marginBottom: 18,
     backgroundColor: '#fff',
   },
   readOnlyInput: {
@@ -278,7 +291,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#3178C6',
     paddingVertical: 12,
-    marginRight: 8,
+    marginLeft: 8,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -289,9 +302,9 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     flex: 1,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#333',
     paddingVertical: 12,
-    marginLeft: 8,
+    marginRight: 8,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -305,7 +318,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 24,
   },
   deleteButtonText: {
     color: '#fff',
