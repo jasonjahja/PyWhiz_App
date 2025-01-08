@@ -1,64 +1,56 @@
-import { Image, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { auth } from '@/firebase'; // Adjust the path based on your Firebase setup
+import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'expo-router';
 import Navbar from '@/components/ui/Navbar';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function HomePage() {
+  const [email, setEmail] = useState('');
+  const router = useRouter();
 
-export default function HomeScreen() {
+  // Fetch the user's email from Firebase Auth
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setEmail(user.email || ''); // Set the email if the user is logged in
+      } else {
+        // Redirect to login if no user is logged in
+        router.replace('/login');
+      }
+    });
+
+    return () => unsubscribe(); // Clean up the listener
+  }, []);
+
+  const handleButtonPress = () => {
+    Alert.alert('Mulai!', 'Let’s begin your learning journey.');
+  };
+
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <Navbar />
 
-      {/* Main Content */}
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <ThemedView style={styles.content}>
-          {/* Hero Section */}
-          {/* <ThemedView style={styles.heroSection}>
-            <ThemedText style={styles.mainTitle}>Belajar Python</ThemedText>
-            <ThemedText style={styles.subTitle}>Sekarang!</ThemedText>
-            <ThemedText style={styles.description}>
-              Learn Python in a simple and enjoyable way, one step at a time,
-              and boost your skills in just a few minutes each day.
-            </ThemedText>
-          </ThemedView> */}
+      <View style={styles.content}>
+        {/* Greeting Section */}
+        <Text style={styles.greeting}>Hi, {email}</Text>
 
-          {/* Image Grid */}
-          {/* <ThemedView style={styles.imageGrid}>
-            <Image
-              source={require('@/assets/images/python-logo-large.png')}
-              style={styles.pythonLogo}
-            />
+        {/* Main Heading */}
+        <Text style={styles.mainTitle}>Mulai Belajar Sekarang!</Text>
 
-            <ThemedView style={styles.smallImagesContainer}> */}
-              {/* Smaller Images */}
-              {/* <Image
-                source={require('@/assets/images/code-sample-1.png')}
-                style={styles.smallImage}
-              />
-              <Image
-                source={require('@/assets/images/code-sample-2.png')}
-                style={styles.smallImage}
-              />
-              <Image
-                source={require('@/assets/images/workspace.png')}
-                style={styles.smallImage}
-              />
-              <Image
-                source={require('@/assets/images/developer.png')}
-                style={styles.smallImage}
-              />
-            </ThemedView>
-          </ThemedView> */}
-        </ThemedView>
+        {/* Mulai Button */}
+        <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
+          <Text style={styles.buttonText}>Mulai</Text>
+        </TouchableOpacity>
 
-        {/* Footer */}
-        <ThemedView style={styles.footer}>
-          <ThemedText style={styles.footerText}>
-            Made by Jason Jahja (18222116) - Anindita Widya Santoso (18222128)
-          </ThemedText>
-        </ThemedView>
-      </ScrollView>
-    </ThemedView>
+        {/* Image Section */}
+        <Image
+          source={require('@/assets/images/group-illustration.png')} // Replace with your image path
+          style={styles.image}
+          resizeMode="cover"
+        />
+      </View>
+    </View>
   );
 }
 
@@ -67,75 +59,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    paddingTop: 124,
-  },
   content: {
     flex: 1,
-    flexDirection: 'column',
-    padding: 32,
-    gap: 62,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
-  heroSection: {
-    flex: 3,
-    justifyContent: 'center',
+  greeting: {
+    fontSize: 20,
+    fontWeight: '400',
+    marginBottom: 4,
+    color: '#333',
   },
   mainTitle: {
-    fontSize: 42,
+    fontSize: 28,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 48,
     color: '#333',
-    lineHeight: 52,
   },
-  subTitle: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#3178C6',
-    marginBottom: 18,
-    lineHeight: 52,
-  },
-  description: {
-    fontSize: 18,
-    color: '#333',
-    lineHeight: 24,
-  },
-  imageGrid: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  pythonLogo: {
-    width: '100%',
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 32,
-  },
-  smallImage: {
-    width: '48%',
-    height: 150,
-    resizeMode: 'cover',
+  button: {
+    backgroundColor: '#E0E0E0',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
+    marginBottom: 154,
   },
-  smallImagesContainer: {
-    flex: 2,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    justifyContent: 'space-between',
+  buttonText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  image: {
     width: '100%',
-  },
-  footer: {
-    padding: 16,
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  footerText: {
-    color: '#666',
-    fontSize: 14,
+    height: 200,
+    borderRadius: 8,
   },
 });

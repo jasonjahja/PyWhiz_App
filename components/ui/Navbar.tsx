@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   sidebar: {
     position: 'absolute',
-    top: 0,
+    top: 30,
     bottom: 0,
     right: 0,
     width: '65%',
