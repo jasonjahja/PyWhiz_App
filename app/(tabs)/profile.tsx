@@ -123,18 +123,6 @@ export default function ProfileScreen() {
                 {/* Header */}
                 <Text style={styles.header}>Profile</Text>
 
-                {/* Profile Picture */}
-                <View style={styles.profilePictureContainer}>
-                    <Image
-                    source={require('@/assets/images/avatar-placeholder.jpg')} // Replace with your image path
-                    style={styles.profilePicture}
-                    />
-                    <TouchableOpacity style={styles.editPhotoButton}>
-                    <Icon name="pencil" size={16} color="#fff" />
-                    <Text style={styles.editPhotoText}>Edit Photo</Text>
-                    </TouchableOpacity>
-                </View>
-
                 {/* Profile Form */}
                 <View style={styles.form}>
                     <Text style={styles.label}>Name</Text>
@@ -242,31 +230,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
     textAlign: 'center',
-  },
-  profilePictureContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  profilePicture: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: '#3178C6',
-  },
-  editPhotoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3178C6',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  editPhotoText: {
-    color: '#fff',
-    fontSize: 14,
-    marginLeft: 4,
   },
   form: {
     marginBottom: 24,
