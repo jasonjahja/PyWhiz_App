@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { ThemedText } from '../ThemedText'; // Adjust import path
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/firebase'; // Adjust path to your firebase configuration
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
@@ -52,10 +52,19 @@ export default function Navbar() {
     <View>
       {/* Navbar */}
       <View style={styles.navbar}>
+      <TouchableOpacity
+        onPress={() => {
+            if (isAuthenticated) {
+            router.push('/home'); // Redirect to home if authenticated
+            }
+        }}
+        disabled={!isAuthenticated} // Disable press if not authenticated
+        >
         <Image
-          source={require('@/assets/images/python-logo.png')}
-          style={styles.navLogo}
+            source={require('@/assets/images/python-logo.png')}
+            style={styles.navLogo}
         />
+        </TouchableOpacity>
         {isAuthenticated ? (
           // Hamburger Icon for Authenticated User
           <TouchableOpacity onPress={toggleSidebar} style={styles.iconContainer}>
