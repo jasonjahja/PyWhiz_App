@@ -4,7 +4,7 @@ import { Link } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
+export default function LandingPage() {
   return (
     <ThemedView style={styles.container}>
       {/* Navigation Bar */}
@@ -13,7 +13,7 @@ export default function HomeScreen() {
           source={require('@/assets/images/python-logo.png')}
           style={styles.navLogo}
         />
-        <Link href="/sign-in" asChild>
+        <Link href="/register" asChild>
           <Pressable style={styles.signInButton} accessibilityLabel="Sign In">
             <ThemedText style={styles.signInText}>Sign In</ThemedText>
           </Pressable>
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 48,
+    paddingHorizontal: 32,
     paddingTop: 48,
     paddingVertical: Platform.OS === 'ios' ? 48 : 16,
     backgroundColor: '#fff',
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     padding: 32,
-    gap: 72,
+    gap: 62,
   },
   heroSection: {
     flex: 3,
