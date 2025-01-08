@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, Alert, TouchableOpacity } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle visibility
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -42,13 +44,25 @@ export default function LoginScreen() {
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!passwordVisible} // Toggle secureTextEntry
+        />
+        <TouchableOpacity
+          onPress={() => setPasswordVisible(!passwordVisible)}
+          style={styles.icon}
+        >
+          <Icon
+            name={passwordVisible ? 'eye-off-outline' : 'eye-outline'} // Dynamic icon
+            size={20}
+            color="#888"
+          />
+        </TouchableOpacity>
+      </View>
       <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
       </Pressable>
@@ -71,13 +85,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
+  inputContainer: {
+    width: '100%',
+    position: 'relative',
+    marginTop: 8,
+  },
   input: {
     width: '100%',
     padding: 16,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+  },
+  icon: {
+    position: 'absolute',
+    right: 16, 
+    top: '50%',
+    transform: [{ translateY: -12 }],
   },
   button: {
     backgroundColor: '#3178C6',
@@ -85,6 +110,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: '100%',
     alignItems: 'center',
+    marginTop: 24,
   },
   buttonText: {
     color: '#fff',

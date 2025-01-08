@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, Alert, TouchableOpacity } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase'; 
+import { auth } from '../firebase';
 import { useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -10,6 +11,9 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
@@ -48,20 +52,44 @@ export default function RegisterScreen() {
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!passwordVisible}
+        />
+        <TouchableOpacity
+          onPress={() => setPasswordVisible(!passwordVisible)}
+          style={styles.icon}
+        >
+          <Icon
+            name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
+            size={20}
+            color="#888"
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={!confirmPasswordVisible}
+        />
+        <TouchableOpacity
+          onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+          style={styles.icon}
+        >
+          <Icon
+            name={confirmPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+            size={20}
+            color="#888"
+          />
+        </TouchableOpacity>
+      </View>
       <Pressable style={styles.button} onPress={handleRegister} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Registering...' : 'Register'}</Text>
       </Pressable>
@@ -84,13 +112,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
+  inputContainer: {
+    width: '100%',
+    position: 'relative', // Relative to position the icon absolutely
+    marginTop: 8,
+  },
   input: {
     width: '100%',
     padding: 16,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+  },
+  icon: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -12 }],
   },
   button: {
     backgroundColor: '#3178C6',
@@ -98,6 +137,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: '100%',
     alignItems: 'center',
+    marginTop: 24,
   },
   buttonText: {
     color: '#fff',
