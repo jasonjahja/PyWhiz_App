@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
-    position: 'relative', // Relative to position the icon absolutely
+    position: 'relative',
     marginTop: 8,
   },
   input: {

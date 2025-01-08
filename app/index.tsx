@@ -1,5 +1,5 @@
-import { Image, StyleSheet, Platform, ScrollView, Pressable } from 'react-native';
-import { Link } from 'expo-router';
+import { Image, StyleSheet, ScrollView } from 'react-native';
+import Navbar from '@/components/ui/Navbar';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -7,18 +7,7 @@ import { ThemedView } from '@/components/ThemedView';
 export default function LandingPage() {
   return (
     <ThemedView style={styles.container}>
-      {/* Navigation Bar */}
-      <ThemedView style={styles.navbar}>
-        <Image
-          source={require('@/assets/images/python-logo.png')}
-          style={styles.navLogo}
-        />
-        <Link href="/register" asChild>
-          <Pressable style={styles.signInButton} accessibilityLabel="Sign In">
-            <ThemedText style={styles.signInText}>Sign In</ThemedText>
-          </Pressable>
-        </Link>
-      </ThemedView>
+      <Navbar />
 
       {/* Main Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
@@ -77,41 +66,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  navbar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingTop: 48,
-    paddingVertical: Platform.OS === 'ios' ? 48 : 16,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-    zIndex: 1000,
-  },
-  navLogo: {
-    width: 54,
-    height: 54,
-    resizeMode: 'contain',
-  },
-  signInButton: {
-    backgroundColor: '#3178C6',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  signInText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   scrollView: {
     flex: 1,

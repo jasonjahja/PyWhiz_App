@@ -1,109 +1,141 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { Image, StyleSheet, ScrollView } from 'react-native';
+import Navbar from '@/components/ui/Navbar';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
+    <ThemedView style={styles.container}>
+      <Navbar />
+
+      {/* Main Content */}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <ThemedView style={styles.content}>
+          {/* Hero Section */}
+          {/* <ThemedView style={styles.heroSection}>
+            <ThemedText style={styles.mainTitle}>Belajar Python</ThemedText>
+            <ThemedText style={styles.subTitle}>Sekarang!</ThemedText>
+            <ThemedText style={styles.description}>
+              Learn Python in a simple and enjoyable way, one step at a time,
+              and boost your skills in just a few minutes each day.
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </ThemedView> */}
+
+          {/* Image Grid */}
+          {/* <ThemedView style={styles.imageGrid}>
+            <Image
+              source={require('@/assets/images/python-logo-large.png')}
+              style={styles.pythonLogo}
+            />
+
+            <ThemedView style={styles.smallImagesContainer}> */}
+              {/* Smaller Images */}
+              {/* <Image
+                source={require('@/assets/images/code-sample-1.png')}
+                style={styles.smallImage}
+              />
+              <Image
+                source={require('@/assets/images/code-sample-2.png')}
+                style={styles.smallImage}
+              />
+              <Image
+                source={require('@/assets/images/workspace.png')}
+                style={styles.smallImage}
+              />
+              <Image
+                source={require('@/assets/images/developer.png')}
+                style={styles.smallImage}
+              />
+            </ThemedView>
+          </ThemedView> */}
+        </ThemedView>
+
+        {/* Footer */}
+        <ThemedView style={styles.footer}>
+          <ThemedText style={styles.footerText}>
+            Made by Jason Jahja (18222116) - Anindita Widya Santoso (18222128)
+          </ThemedText>
+        </ThemedView>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  titleContainer: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    paddingTop: 124,
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'column',
+    padding: 32,
+    gap: 62,
+  },
+  heroSection: {
+    flex: 3,
+    justifyContent: 'center',
+  },
+  mainTitle: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#333',
+    lineHeight: 52,
+  },
+  subTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#3178C6',
+    marginBottom: 18,
+    lineHeight: 52,
+  },
+  description: {
+    fontSize: 18,
+    color: '#333',
+    lineHeight: 24,
+  },
+  imageGrid: {
+    flex: 1,
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  pythonLogo: {
+    width: '100%',
+    height: 100,
+    resizeMode: 'contain',
+    marginBottom: 32,
+  },
+  smallImage: {
+    width: '48%',
+    height: 150,
+    resizeMode: 'cover',
+    borderRadius: 8,
+  },
+  smallImagesContainer: {
+    flex: 2,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  footer: {
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 14,
   },
 });
