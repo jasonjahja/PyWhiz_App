@@ -82,8 +82,7 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await signOut(auth);
-              Alert.alert('Success', 'You have been logged out.');
-              router.replace('/login');
+              router.replace('/');
             } catch (error: any) {
               Alert.alert('Error', error.message || 'Failed to log out.');
             }
