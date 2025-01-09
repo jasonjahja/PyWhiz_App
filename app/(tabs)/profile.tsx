@@ -14,9 +14,11 @@ import { auth } from '@/firebase';
 import { updateProfile, reauthenticateWithCredential, updatePassword, EmailAuthProvider, signOut } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import Navbar from '@/components/ui/Navbar';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [photoURL, setPhotoURL] = useState(auth.currentUser?.photoURL || '');
   const [name, setName] = useState(auth.currentUser?.displayName || '');
   const [email] = useState(auth.currentUser?.email || '');
   const [oldPassword, setOldPassword] = useState('');
@@ -24,6 +26,40 @@ export default function ProfileScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [oldPasswordVisible, setOldPasswordVisible] = useState(false);
 
+  const handleEditPhoto = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert('Error', 'No user is currently signed in.');
+      return;
+    }
+
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need permissions to access your gallery.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const selectedImageUri = result.assets[0].uri;
+
+      try {
+        await updateProfile(user, { photoURL: selectedImageUri });
+        setPhotoURL(selectedImageUri); // Update the local state
+        Alert.alert('Success', 'Profile picture updated successfully!');
+      } catch (error: any) {
+        Alert.alert('Error', error.message || 'Failed to update profile picture.');
+      }
+    }
+  };
+  
   const handleSaveChanges = async () => {
     const user = auth.currentUser;
   
@@ -135,6 +171,22 @@ export default function ProfileScreen() {
                 {/* Header */}
                 <Text style={styles.header}>Profile</Text>
 
+                {/* Profile Picture */}
+                <View style={styles.profilePictureContainer}>
+                  <Image
+                    source={
+                      photoURL
+                        ? { uri: photoURL }
+                        : require('@/assets/images/avatar-placeholder.jpg') 
+                    }
+                    style={styles.profilePicture}
+                  />
+                  <TouchableOpacity style={styles.editPhotoButton} onPress={handleEditPhoto}>
+                    <Icon name="pencil" size={16} color="#fff" />
+                    <Text style={styles.editPhotoText}>Edit Photo</Text>
+                  </TouchableOpacity>
+                </View>
+
                 {/* Profile Form */}
                 <View style={styles.form}>
                     <Text style={styles.label}>Name</Text>
@@ -240,11 +292,37 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 48,
+    marginBottom: 24,
     textAlign: 'center',
   },
+  profilePictureContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profilePicture: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: '#3178C6',
+  },
+  editPhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3178C6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  editPhotoText: {
+    color: '#fff',
+    fontSize: 14,
+    marginLeft: 4,
+  },
   form: {
-    marginBottom: 98,
+    marginTop: 24,
+    marginBottom: 72,
   },
   label: {
     fontSize: 14,

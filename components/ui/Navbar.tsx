@@ -1,109 +1,68 @@
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-  Text,
-} from 'react-native';
-import { Link } from 'expo-router';
-import { ThemedText } from '../ThemedText'; // Adjust import path
-import { onAuthStateChanged } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { auth } from '@/firebase'; // Adjust path to your firebase configuration
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-
-const { width, height } = Dimensions.get('window'); // Get screen dimensions
+import { ThemedText } from '../ThemedText';
 
 export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [sidebarVisible, setSidebarVisible] = useState(false);
-  const slideAnim = useRef(new Animated.Value(width)).current; // Sidebar starts off-screen
+  const [photoURL, setPhotoURL] = useState<string | null>(null); // Internal state for profile picture
   const router = useRouter();
 
-  // Listen to Firebase authentication state
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
+  useEffect(() => {
+    const unsubscribe = auth.onIdTokenChanged((user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setPhotoURL(user.photoURL || null); // Update the profile picture when it changes
+      } else {
+        setIsAuthenticated(false);
+        setPhotoURL(null);
+      }
     });
 
     return () => unsubscribe();
   }, []);
 
-  const toggleSidebar = () => {
-    if (sidebarVisible) {
-      Animated.timing(slideAnim, {
-        toValue: width, 
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => setSidebarVisible(false));
-    } else {
-      Animated.timing(slideAnim, {
-        toValue: 0, 
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => setSidebarVisible(true));
-    }
-  };
-
   return (
-    <View>
-      {/* Navbar */}
-      <View style={styles.navbar}>
+    <View style={styles.navbar}>
+      {/* Logo */}
       <TouchableOpacity
         onPress={() => {
-            if (isAuthenticated) {
+          if (isAuthenticated) {
             router.push('/home'); // Redirect to home if authenticated
-            }
+          }
         }}
         disabled={!isAuthenticated} // Disable press if not authenticated
-        >
+      >
         <Image
-            source={require('@/assets/images/python-logo.png')}
-            style={styles.navLogo}
+          source={require('@/assets/images/python-logo.png')}
+          style={styles.navLogo}
         />
-        </TouchableOpacity>
-        {isAuthenticated ? (
-          // Hamburger Icon for Authenticated User
-          <TouchableOpacity onPress={toggleSidebar} style={styles.iconContainer}>
-            <Icon name="menu-outline" size={28} color="#333" />
-          </TouchableOpacity>
-        ) : (
-          // Login Button for Unauthenticated User
-          <Link href="/login" asChild>
-            <TouchableOpacity style={styles.signInButton} accessibilityLabel="Sign In">
-              <ThemedText style={styles.signInText}>Login</ThemedText>
-            </TouchableOpacity>
-          </Link>
-        )}
-      </View>
+      </TouchableOpacity>
 
-      {/* Sidebar */}
-      {sidebarVisible && (
-        <Animated.View style={[styles.sidebar, { transform: [{ translateX: slideAnim }] }]}>
-          <TouchableOpacity onPress={toggleSidebar} style={styles.closeButton}>
-            <Icon name="close-outline" size={28} color="#fff" />
-          </TouchableOpacity>
-          <View style={styles.sidebarContent}>
-            <Link href="/home" asChild>
-              <TouchableOpacity onPress={toggleSidebar}>
-                <Text style={styles.sidebarItem}>Home</Text>
-              </TouchableOpacity>
-            </Link>
-            <Link href="/module" asChild>
-              <TouchableOpacity onPress={toggleSidebar}>
-                <Text style={styles.sidebarItem}>Module</Text>
-              </TouchableOpacity>
-            </Link>
-            <Link href="/profile" asChild>
-              <TouchableOpacity onPress={toggleSidebar}>
-                <Text style={styles.sidebarItem}>Profile</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </Animated.View>
+      {/* Profile Picture or Login Button */}
+      {isAuthenticated ? (
+        <TouchableOpacity
+          onPress={() => router.push('/profile')}
+          style={styles.profileContainer}
+        >
+          <Image
+            source={
+              photoURL
+                ? { uri: photoURL } // Use the user's profile picture
+                : require('@/assets/images/avatar-placeholder.jpg') // Fallback to default avatar
+            }
+            style={styles.profilePicture}
+          />
+        </TouchableOpacity>
+      ) : (
+        // Login Button for Unauthenticated User
+        <TouchableOpacity
+          onPress={() => router.push('/login')}
+          style={styles.signInButton}
+        >
+          <ThemedText style={styles.signInText}>Login</ThemedText>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -145,31 +104,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  iconContainer: {
-    padding: 10,
+  profileContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#3178C6',
   },
-  sidebar: {
-    position: 'absolute',
-    top: 30,
-    bottom: 0,
-    right: 0,
-    width: '65%',
-    backgroundColor: '#333',
-    padding: 24,
-    zIndex: 2000,
-    height: height,
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    padding: 10,
-  },
-  sidebarContent: {
-    marginTop: 20,
-  },
-  sidebarItem: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 18,
+  profilePicture: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 });

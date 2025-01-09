@@ -1,33 +1,53 @@
+import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { Stack } from 'expo-router';
 
+import { HapticTab } from '@/components/HapticTab';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-export default function Layout() {
+export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Stack
+    <Tabs
       screenOptions={{
-        headerShown: false, // Hide headers globally
-        contentStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background, // Apply theme background color
-        },
-        cardStyle: Platform.select({
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerShown: false,
+        tabBarButton: HapticTab,
+        tabBarBackground: TabBarBackground,
+        tabBarStyle: Platform.select({
           ios: {
-            backgroundColor: 'transparent',
+            // Use a transparent background on iOS to show the blur effect
+            position: 'absolute',
           },
-          default: {
-            backgroundColor: Colors[colorScheme ?? 'light'].background,
-          },
+          default: {},
         }),
       }}
     >
-      {/* Define individual screens */}
-      <Stack.Screen name="home" options={{ title: 'Home' }} />
-      <Stack.Screen name="profile" options={{ title: 'Profile' }} />
-    </Stack>
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="module"
+        options={{
+          title: 'Module',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+        }}
+      />
+    </Tabs>
   );
 }
