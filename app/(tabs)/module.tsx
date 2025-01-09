@@ -83,6 +83,7 @@ export default function HomePage() {
           </ScrollView>
         </View>
 
+        <Text style={styles.aboveHeroTitle}>Latest Learned</Text>
         <View style={styles.heroContainer}>
           {/* Background Illustration */}
           <View style={styles.background}>
@@ -95,7 +96,7 @@ export default function HomePage() {
 
           {/* Text Content */}
           <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>Road to JavaScript Expert</Text>
+            <Text style={styles.heroTitle}>Module 1 - Python print</Text>
             <Text style={styles.heroSubtitle}>Part 1 - 24 Minutes</Text>
           </View>
         </View>
@@ -111,7 +112,7 @@ export default function HomePage() {
               <View style={styles.courseCategory}>
                 <Text style={styles.courseCategoryText}>Beginner</Text>
               </View>
-              <Text style={styles.courseTitle}>Expert Math In 20 Min</Text>
+              <Text style={styles.courseTitle}>Module 1 - Python Print</Text>
               <View style={styles.courseProgress}>
                 <Text style={styles.courseProgressText}>4/6 Video</Text>
                 <Text style={styles.courseProgressPercentage}>60%</Text>
@@ -131,7 +132,47 @@ export default function HomePage() {
               <View style={styles.courseCategory}>
                 <Text style={styles.courseCategoryText}>Beginner</Text>
               </View>
-              <Text style={styles.courseTitle}>Expert Math In 20 Min</Text>
+              <Text style={styles.courseTitle}>Module 2 - Conditional</Text>
+              <View style={styles.courseProgress}>
+                <Text style={styles.courseProgressText}>4/6 Video</Text>
+                <Text style={styles.courseProgressPercentage}>60%</Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFill}></View>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.stretchedCourseCard}>
+            <Image
+              source={require('@/assets/images/python-logo.png')} // Replace with your course image
+              style={styles.courseImage}
+            />
+            <View style={styles.courseContent}>
+              <View style={styles.courseCategory}>
+                <Text style={styles.courseCategoryText}>Beginner</Text>
+              </View>
+              <Text style={styles.courseTitle}>Module 3 - Loop</Text>
+              <View style={styles.courseProgress}>
+                <Text style={styles.courseProgressText}>4/6 Video</Text>
+                <Text style={styles.courseProgressPercentage}>60%</Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFill}></View>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.stretchedCourseCard}>
+            <Image
+              source={require('@/assets/images/python-logo.png')} // Replace with your course image
+              style={styles.courseImage}
+            />
+            <View style={styles.courseContent}>
+              <View style={styles.courseCategory}>
+                <Text style={styles.courseCategoryText}>Beginner</Text>
+              </View>
+              <Text style={styles.courseTitle}>Module 4 - Function</Text>
               <View style={styles.courseProgress}>
                 <Text style={styles.courseProgressText}>4/6 Video</Text>
                 <Text style={styles.courseProgressPercentage}>60%</Text>
@@ -155,7 +196,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: 16,
-    marginTop: 24,
+    marginTop: 54,
   },
   // searchContainer: {
   //   marginTop: 136,
@@ -186,7 +227,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 36,
+    marginBottom: 28,
   },
   iconButton: {
     padding: 8,
@@ -198,12 +239,12 @@ const styles = StyleSheet.create({
   },
   // Categories Section
   categoriesContainer: {
-    marginBottom: 12,
+    marginBottom: 18,
   },
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 36,
     marginRight: 8,
   },
   blueCategory: {
@@ -218,17 +259,30 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   coursesContainer: {
-    marginBottom: 24,
+    marginBottom: 154,
   },
   // Hero Section
+  aboveHeroTitle: {
+    marginTop: 6,
+    marginLeft: 6,
+    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4A4A4A',
+  },
   heroContainer: {
     backgroundColor: '#F8E1DB',
     borderRadius: 12,
     overflow: 'hidden',
     padding: 16,
-    marginBottom: 24,
+    marginBottom: 32,
     flexDirection: 'row',
     alignItems: 'center',
+    height: '20%',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
   background: {
     position: 'absolute',
@@ -262,21 +316,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     overflow: 'hidden',
-    elevation: 4,
+    elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    marginBottom: 8,
+    marginBottom: 14,
     padding: 6,
   },
   courseImage: {
     width: 80,
     height: '100%',
-    marginLeft: 32,
-    marginRight: 32,
+    marginLeft: 28,
+    marginRight: 28,
   },
   courseContent: {
     padding: 4,
+    width: '60%',
   },
   courseCategory: {
     alignSelf: 'flex-start',
@@ -301,7 +356,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
-    width: '140%',
   },
   courseProgressText: {
     fontSize: 10,
@@ -316,7 +370,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
     borderRadius: 3,
     overflow: 'hidden',
-    width: '140%',
   },
   progressFill: {
     height: '100%',

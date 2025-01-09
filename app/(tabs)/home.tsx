@@ -136,7 +136,7 @@ export default function HomePage() {
                 source={require('@/assets/images/python-logo.png')} // Replace with your course image
                 style={styles.courseImage}
               />
-              <Text style={styles.courseTitle}>Expert Math In 20 Min</Text>
+              <Text style={styles.courseTitle}>Module 1 - Python Print</Text>
               <View style={styles.courseFooter}>
                 <View style={styles.footerItem}>
                   <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
@@ -154,7 +154,7 @@ export default function HomePage() {
                 source={require('@/assets/images/python-logo.png')} // Replace with your course image
                 style={styles.courseImage}
               />
-              <Text style={styles.courseTitle}>Intro to JS Development</Text>
+              <Text style={styles.courseTitle}>Module 2 - Conditional</Text>
               <View style={styles.courseFooter}>
               <View style={styles.footerItem}>
                   <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: 16,
+    marginTop: 54,
   },
   // heading
   header: {
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: 'bold',
-    color: '#3C77FF', // Accent color
+    color: '#3178C6', // Accent color
   },
   profilePictureWrapper: {
     position: 'relative',
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   circleOutline: {
     position: 'absolute',
     borderWidth: 2,
-    borderColor: '#3C77FF', // Circle outline color
+    borderColor: '#3178C6', // Circle outline color
     borderRadius: 9999,
   },
   mediumCircle: {
@@ -256,16 +257,59 @@ const styles = StyleSheet.create({
   //   marginBottom: 12,
   //   color: '#333',
   // },
-  searchBox: {
+  heroContainer: {
+    position: 'relative',
+    backgroundColor: '#E0F7F5',
+    borderRadius: 16,
+    padding: 20,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  background: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: -1,
+  },
+  illustration: {
+  width: '200%',
+  height: '200%',
+  position: 'absolute',
+  top: '-25%',
+  right: '-85%',
+  opacity: 0.25,
+},
+  content: {
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderRadius: 24,
     paddingHorizontal: 12,
-    height: 50,
+    paddingVertical: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
-  searchButton: {
-    marginLeft: 8,
+  searchIcon: {
+    marginLeft: 4,
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
   },
   categoriesContainer: {
     marginBottom: 24,
@@ -279,7 +323,7 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 16,
+    borderRadius: 32,
     marginRight: 8,
   },
   blueCategory: {
@@ -347,67 +391,11 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   courseDuration: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#333',
   },
   courseUsers: {
-    fontSize: 12,
-    color: '#333',
-  },
-
-
-  heroContainer: {
-    position: 'relative',
-    backgroundColor: '#E0F7F5',
-    borderRadius: 16,
-    padding: 20,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-  background: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '100%',
-    height: '100%',
-    zIndex: -1,
-  },
-  illustration: {
-  width: '200%',
-  height: '200%',
-  position: 'absolute',
-  top: '-25%',
-  right: '-85%',
-  opacity: 0.25,
-},
-  content: {
-    zIndex: 1,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  searchIcon: {
-    marginLeft: 4,
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
+    fontSize: 10,
     color: '#333',
   },
 });
