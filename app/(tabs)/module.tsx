@@ -11,8 +11,8 @@ import {
 import { auth } from '@/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import Navbar from '@/components/ui/Navbar';
 import Icon from 'react-native-vector-icons/Ionicons';
+import StretchedCourseCard from '@/components/ui/StretchedCourseCards';
 
 export default function HomePage() {
   const [name, setName] = useState('');
@@ -30,10 +30,13 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
+  const handleCoursePress = () => {
+    // Navigate to a different page
+    console.log('Course Pressed');
+  };
+
   return (
     <View style={styles.container}>
-      {/* <Navbar /> */}
-
       <ScrollView style={styles.scrollContainer}>
         {/* Search Section */}
         {/* <View style={styles.searchContainer}>
@@ -103,85 +106,38 @@ export default function HomePage() {
 
         {/* Courses Section */}
         <View style={styles.coursesContainer}>
-          <View style={styles.stretchedCourseCard}>
-            <Image
-              source={require('@/assets/images/python-logo.png')} // Replace with your course image
-              style={styles.courseImage}
-            />
-            <View style={styles.courseContent}>
-              <View style={styles.courseCategory}>
-                <Text style={styles.courseCategoryText}>Beginner</Text>
-              </View>
-              <Text style={styles.courseTitle}>Module 1 - Python Print</Text>
-              <View style={styles.courseProgress}>
-                <Text style={styles.courseProgressText}>4/6 Video</Text>
-                <Text style={styles.courseProgressPercentage}>60%</Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={styles.progressFill}></View>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.stretchedCourseCard}>
-            <Image
-              source={require('@/assets/images/python-logo.png')} // Replace with your course image
-              style={styles.courseImage}
-            />
-            <View style={styles.courseContent}>
-              <View style={styles.courseCategory}>
-                <Text style={styles.courseCategoryText}>Beginner</Text>
-              </View>
-              <Text style={styles.courseTitle}>Module 2 - Conditional</Text>
-              <View style={styles.courseProgress}>
-                <Text style={styles.courseProgressText}>4/6 Video</Text>
-                <Text style={styles.courseProgressPercentage}>60%</Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={styles.progressFill}></View>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.stretchedCourseCard}>
-            <Image
-              source={require('@/assets/images/python-logo.png')} // Replace with your course image
-              style={styles.courseImage}
-            />
-            <View style={styles.courseContent}>
-              <View style={styles.courseCategory}>
-                <Text style={styles.courseCategoryText}>Beginner</Text>
-              </View>
-              <Text style={styles.courseTitle}>Module 3 - Loop</Text>
-              <View style={styles.courseProgress}>
-                <Text style={styles.courseProgressText}>4/6 Video</Text>
-                <Text style={styles.courseProgressPercentage}>60%</Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={styles.progressFill}></View>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.stretchedCourseCard}>
-            <Image
-              source={require('@/assets/images/python-logo.png')} // Replace with your course image
-              style={styles.courseImage}
-            />
-            <View style={styles.courseContent}>
-              <View style={styles.courseCategory}>
-                <Text style={styles.courseCategoryText}>Beginner</Text>
-              </View>
-              <Text style={styles.courseTitle}>Module 4 - Function</Text>
-              <View style={styles.courseProgress}>
-                <Text style={styles.courseProgressText}>4/6 Video</Text>
-                <Text style={styles.courseProgressPercentage}>60%</Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View style={styles.progressFill}></View>
-              </View>
-            </View>
-          </View>
+          <StretchedCourseCard
+            onPress={handleCoursePress}
+            thumbnail={require('@/assets/images/python-logo.png')}
+            title="Module 1 - Python Print"
+            progress={60}
+            category="Beginner"
+            videos="4/6 Video"
+          />
+          <StretchedCourseCard
+            onPress={handleCoursePress}
+            thumbnail={require('@/assets/images/python-logo.png')}
+            title="Module 2 - Conditional"
+            progress={10}
+            category="Beginner"
+            videos="4/6 Video"
+          />
+          <StretchedCourseCard
+            onPress={handleCoursePress}
+            thumbnail={require('@/assets/images/python-logo.png')}
+            title="Module 3 - Loops"
+            progress={5}
+            category="Beginner"
+            videos="4/6 Video"
+          />
+          <StretchedCourseCard
+            onPress={handleCoursePress}
+            thumbnail={require('@/assets/images/python-logo.png')}
+            title="Module 4 - Functions"
+            progress={0}
+            category="Beginner"
+            videos="4/6 Video"
+          />
         </View>
       </ScrollView>
     </View>
@@ -195,7 +151,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     marginTop: 54,
   },
   // searchContainer: {
@@ -309,71 +265,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginBottom: 12,
-  },
-  // Stretched Course Card
-  stretchedCourseCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    marginBottom: 14,
-    padding: 6,
-  },
-  courseImage: {
-    width: 80,
-    height: '100%',
-    marginLeft: 28,
-    marginRight: 28,
-  },
-  courseContent: {
-    padding: 4,
-    width: '60%',
-  },
-  courseCategory: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#3178C6',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 16,
-    marginBottom: 4,
-  },
-  courseCategoryText: {
-    fontSize: 10,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  courseTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  courseProgress: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  courseProgressText: {
-    fontSize: 10,
-    color: '#777',
-  },
-  courseProgressPercentage: {
-    fontSize: 10,
-    color: '#777',
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    width: '60%', // Adjust width based on progress
-    backgroundColor: '#3178C6',
   },
 });

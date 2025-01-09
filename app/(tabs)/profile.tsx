@@ -13,7 +13,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { auth } from '@/firebase';
 import { updateProfile, reauthenticateWithCredential, updatePassword, EmailAuthProvider, signOut } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import Navbar from '@/components/ui/Navbar';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
@@ -157,7 +156,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-        <Navbar />
         <ScrollView>
             <View style={styles.content}>
                 {/* Back Button */}
@@ -282,7 +280,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: '#f5f5f5',
-    paddingTop: 118,
+    paddingTop: 36,
   },
   backButton: {
     position: 'relative',
@@ -290,9 +288,10 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   header: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 24,
+    color: '#4A4A4A',
+    marginBottom: 28,
     textAlign: 'center',
   },
   profilePictureContainer: {
@@ -321,8 +320,8 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   form: {
-    marginTop: 24,
-    marginBottom: 72,
+    marginTop: 12,
+    marginBottom: 36,
   },
   label: {
     fontSize: 14,

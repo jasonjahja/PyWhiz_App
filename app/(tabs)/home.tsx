@@ -11,12 +11,13 @@ import {
 import { auth } from '@/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import Navbar from '@/components/ui/Navbar';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CourseCard from '@/components/ui/CourseCard';
 
 export default function HomePage() {
   const [name, setName] = useState('Guest');
   const [photoURL, setPhotoURL] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch the current user details from Firebase Auth
@@ -33,10 +34,13 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
+  const handlePress = () => {
+    console.log('Course card pressed');
+  };
+
+
   return (
     <View style={styles.container}>
-      {/* <Navbar /> */}
-
       <ScrollView style={styles.scrollContainer}>
         {/* Greeting Section */}
         {/* <Text style={styles.greeting}>Hi, {name}</Text> */}
@@ -72,7 +76,10 @@ export default function HomePage() {
           <View style={styles.profilePictureWrapper}>
             <View style={[styles.circleOutline, styles.mediumCircle]} />
             <View style={[styles.circleOutline, styles.largeCircle]} />
-            <TouchableOpacity style={styles.profilePictureContainer}>
+            <TouchableOpacity 
+              onPress={() => router.push('/profile')}
+              style={styles.profilePictureContainer}
+            >
               <Image
                 source={
                   photoURL
@@ -129,43 +136,16 @@ export default function HomePage() {
 
         {/* Popular Courses Section */}
         <View style={styles.popularCoursesContainer}>
-          <Text style={styles.sectionTitle}>Popular Courses</Text>
+          <Text style={styles.sectionTitle}>Learn Our Most Popular Course</Text>
           <View style={styles.coursesRow}>
-            <View style={styles.courseCard}>
-              <Image
-                source={require('@/assets/images/python-logo.png')} // Replace with your course image
-                style={styles.courseImage}
-              />
-              <Text style={styles.courseTitle}>Module 1 - Python Print</Text>
-              <View style={styles.courseFooter}>
-                <View style={styles.footerItem}>
-                  <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
-                  <Text style={styles.courseDuration}>50 Min</Text>
-                </View>
-                <View style={styles.footerItem}>
-                  <Icon name="people-outline" size={16} color="#888" style={styles.footerIcon} />
-                  <Text style={styles.courseUsers}>24 Users</Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.courseCard}>
-              <Image
-                source={require('@/assets/images/python-logo.png')} // Replace with your course image
-                style={styles.courseImage}
-              />
-              <Text style={styles.courseTitle}>Module 2 - Conditional</Text>
-              <View style={styles.courseFooter}>
-              <View style={styles.footerItem}>
-                  <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
-                  <Text style={styles.courseDuration}>50 Min</Text>
-                </View>
-                <View style={styles.footerItem}>
-                  <Icon name="people-outline" size={16} color="#888" style={styles.footerIcon} />
-                  <Text style={styles.courseUsers}>15 Users</Text>
-                </View>
-              </View>
-            </View>
+            <CourseCard
+              image={require('@/assets/images/python-logo.png')} // Replace with your course image
+              category='Beginner'
+              title="Module 1 - Python Print"
+              duration="50 Min"
+              users="24 Users"
+              onPress={handlePress}
+            />
           </View>
         </View>
       </ScrollView>
@@ -343,59 +323,5 @@ const styles = StyleSheet.create({
   coursesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  courseCard: {
-    width: '48%',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    padding: 12,
-  },
-  courseImage: {
-    width: '100%',
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-
-  // ini category
-  courseCategory: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#3178C6',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-    marginBottom: 8,
-  },
-  courseCategoryText: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-
-  courseTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
-  },
-  courseFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  footerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  footerIcon: {
-    marginRight: 4,
-  },
-  courseDuration: {
-    fontSize: 10,
-    color: '#333',
-  },
-  courseUsers: {
-    fontSize: 10,
-    color: '#333',
   },
 });
