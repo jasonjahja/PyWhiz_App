@@ -12,34 +12,37 @@ import { auth } from '@/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import Navbar from '@/components/ui/Navbar';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function HomePage() {
-  const [name, setName] = useState('');
-  const router = useRouter();
+  const [name, setName] = useState('Guest');
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // Fetch the current user details from Firebase Auth
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setName(user.displayName || 'Guest'); // Set the email if the user is logged in
+        setName(user.displayName || 'Guest');
+        setPhotoURL(user.photoURL || null);
       } else {
-        // Redirect to login if no user is logged in
-        router.replace('/login');
+        setName('Guest');
+        setPhotoURL(null);
       }
     });
 
-    return () => unsubscribe(); // Clean up the listener
+    return () => unsubscribe();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Navbar />
+      {/* <Navbar /> */}
 
       <ScrollView style={styles.scrollContainer}>
         {/* Greeting Section */}
-        <Text style={styles.greeting}>Hi, {name}</Text>
+        {/* <Text style={styles.greeting}>Hi, {name}</Text> */}
 
         {/* Search Section */}
-        <View style={styles.searchContainer}>
+        {/* <View style={styles.searchContainer}>
           <Text style={styles.title}>Find a course you want to learn</Text>
           <View style={styles.searchBox}>
             <TextInput
@@ -53,6 +56,58 @@ export default function HomePage() {
                 style={styles.searchIcon}
               />
             </TouchableOpacity>
+          </View>
+        </View> */}
+
+        {/* Header Section */}
+        <View style={styles.header}>
+          {/* Greeting Section */}
+          <View style={styles.greetingContainer}>
+            <Text style={styles.greetingText}>
+              Hello, <Text style={styles.userName}>{name}</Text>
+            </Text>
+          </View>
+
+          {/* Profile Picture with Circle Effect */}
+          <View style={styles.profilePictureWrapper}>
+            <View style={[styles.circleOutline, styles.mediumCircle]} />
+            <View style={[styles.circleOutline, styles.largeCircle]} />
+            <TouchableOpacity style={styles.profilePictureContainer}>
+              <Image
+                source={
+                  photoURL
+                    ? { uri: photoURL } // Use the user's profile picture
+                    : require('@/assets/images/avatar-placeholder.jpg') // Fallback to default avatar
+                }
+                style={styles.profilePicture}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.heroContainer}>
+          {/* Background Illustration */}
+          <View style={styles.background}>
+            <Image
+              source={require('@/assets/images/python-logo.png')} // Replace with your image path
+              style={styles.illustration}
+              resizeMode="contain"
+            />
+          </View>
+
+          {/* Text Content */}
+          <View style={styles.content}>
+            <Text style={styles.title}>Find a course you want to learn</Text>
+
+            {/* Search Input */}
+            <View style={styles.searchContainer}>
+              <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search Course"
+                placeholderTextColor="#aaa"
+              />
+            </View>
           </View>
         </View>
 
@@ -82,10 +137,15 @@ export default function HomePage() {
                 style={styles.courseImage}
               />
               <Text style={styles.courseTitle}>Expert Math In 20 Min</Text>
-              <Text style={styles.courseAuthor}>Author by Jennifer</Text>
               <View style={styles.courseFooter}>
-                <Text style={styles.courseDuration}>50 Min</Text>
-                <Text style={styles.courseUsers}>24 Users</Text>
+                <View style={styles.footerItem}>
+                  <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
+                  <Text style={styles.courseDuration}>50 Min</Text>
+                </View>
+                <View style={styles.footerItem}>
+                  <Icon name="people-outline" size={16} color="#888" style={styles.footerIcon} />
+                  <Text style={styles.courseUsers}>24 Users</Text>
+                </View>
               </View>
             </View>
 
@@ -95,10 +155,15 @@ export default function HomePage() {
                 style={styles.courseImage}
               />
               <Text style={styles.courseTitle}>Intro to JS Development</Text>
-              <Text style={styles.courseAuthor}>Author by Samuel</Text>
               <View style={styles.courseFooter}>
-                <Text style={styles.courseDuration}>50 Min</Text>
-                <Text style={styles.courseUsers}>15 Users</Text>
+              <View style={styles.footerItem}>
+                  <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
+                  <Text style={styles.courseDuration}>50 Min</Text>
+                </View>
+                <View style={styles.footerItem}>
+                  <Icon name="people-outline" size={16} color="#888" style={styles.footerIcon} />
+                  <Text style={styles.courseUsers}>15 Users</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -117,22 +182,80 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
   },
-  greeting: {
-    marginTop: 136,
+  // heading
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
     marginBottom: 8,
-    fontSize: 20,
+  },
+  greetingContainer: {
+    flex: 1,
+    paddingTop: 18,
+  },
+  greetingText: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#4A4A4A', // Dark grayish-blue
   },
-  searchContainer: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 20,
+  userName: {
     fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
+    color: '#3C77FF', // Accent color
   },
+  profilePictureWrapper: {
+    position: 'relative',
+    width: 64,
+    height: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circleOutline: {
+    position: 'absolute',
+    borderWidth: 2,
+    borderColor: '#3C77FF', // Circle outline color
+    borderRadius: 9999,
+  },
+  mediumCircle: {
+    width: 150,
+    height: 150,
+    opacity: 0.3,
+  },
+  largeCircle: {
+    width: 240,
+    height: 240,
+    opacity: 0.1,
+  },
+  profilePictureContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    overflow: 'hidden',
+    zIndex: 1,
+  },
+  profilePicture: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+
+  // greeting: {
+  //   marginTop: 136,
+  //   marginBottom: 8,
+  //   fontSize: 20,
+  //   fontWeight: 'bold',
+  //   color: '#333',
+  // },
+  // searchContainer: {
+  //   marginBottom: 24,
+  // },
+  // title: {
+  //   fontSize: 20,
+  //   fontWeight: 'bold',
+  //   marginBottom: 12,
+  //   color: '#333',
+  // },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -141,17 +264,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 50,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
   searchButton: {
     marginLeft: 8,
-  },
-  searchIcon: {
-    width: 24,
-    height: 24,
   },
   categoriesContainer: {
     marginBottom: 24,
@@ -198,20 +312,39 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
+
+  // ini category
+  courseCategory: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#3178C6',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  courseCategoryText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
   courseTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 4,
-    color: '#333',
-  },
-  courseAuthor: {
-    fontSize: 12,
     marginBottom: 8,
-    color: '#777',
+    color: '#333',
   },
   courseFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  footerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  footerIcon: {
+    marginRight: 4,
   },
   courseDuration: {
     fontSize: 12,
@@ -219,6 +352,62 @@ const styles = StyleSheet.create({
   },
   courseUsers: {
     fontSize: 12,
+    color: '#333',
+  },
+
+
+  heroContainer: {
+    position: 'relative',
+    backgroundColor: '#E0F7F5',
+    borderRadius: 16,
+    padding: 20,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  background: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: -1,
+  },
+  illustration: {
+  width: '200%',
+  height: '200%',
+  position: 'absolute',
+  top: '-25%',
+  right: '-85%',
+  opacity: 0.25,
+},
+  content: {
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  searchIcon: {
+    marginLeft: 4,
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
     color: '#333',
   },
 });
