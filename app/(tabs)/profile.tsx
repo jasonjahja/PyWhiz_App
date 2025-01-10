@@ -164,7 +164,7 @@ export default function ProfileScreen() {
                 <View style={styles.profilePictureContainer}>
                   <Image
                     source={
-                      user?.photoURL
+                      photoURL
                         ? { uri: `${user?.photoURL}?t=${new Date().getTime()}` }
                         : require('@/assets/images/avatar-placeholder.jpg')
                     }

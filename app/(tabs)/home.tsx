@@ -16,10 +16,10 @@ import { useUser } from '@/contexts/UserContext';
 
 export default function HomePage() {
   const params = useGlobalSearchParams ();
-  const [name, setName] = useState(auth.currentUser?.displayName || '');
-  const [photoURL, setPhotoURL] = useState<string | null>(null);
-  const router = useRouter();
   const { user } = useUser();
+  const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
+  const router = useRouter();
+  
 
   // useEffect(() => {
   //   const fetchUserData = async () => {
