@@ -17,7 +17,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [photoURL, setPhotoURL] = useState(auth.currentUser?.photoURL || '');
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
+  // const [photoURL, setPhotoURL] = useState<string | null>(auth.currentUser?.photoURL || '');
   const [name, setName] = useState(auth.currentUser?.displayName || '');
   const [email] = useState(auth.currentUser?.email || '');
   const [oldPassword, setOldPassword] = useState('');
@@ -27,37 +28,45 @@ export default function ProfileScreen() {
 
   const handleEditPhoto = async () => {
     const user = auth.currentUser;
-
+  
     if (!user) {
       Alert.alert('Error', 'No user is currently signed in.');
       return;
     }
-
+  
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+  
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'We need permissions to access your gallery.');
       return;
     }
-
+  
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
-
+  
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri;
-
+  
       try {
+        // Update the profile picture in Firebase Authentication
         await updateProfile(user, { photoURL: selectedImageUri });
-        setPhotoURL(selectedImageUri); // Update the local state
+  
+        // Reload the user to ensure the changes are reflected
+        await user.reload();
+  
+        // Update the local state
+        setPhotoURL(user.photoURL);
+  
         Alert.alert('Success', 'Profile picture updated successfully!');
       } catch (error: any) {
         Alert.alert('Error', error.message || 'Failed to update profile picture.');
       }
     }
   };
+  
   
   const handleSaveChanges = async () => {
     const user = auth.currentUser;
@@ -103,7 +112,16 @@ export default function ProfileScreen() {
         Alert.alert('Error', error.message || 'Failed to update profile.');
       }
     }
-  };  
+  
+    // Reload the user to reflect the latest changes
+    try {
+      await user.reload();
+      console.log('User reloaded:', user.displayName, user.photoURL);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to reload user data.');
+    }
+  };
+   
 
   const handleLogout = () => {
     Alert.alert(
@@ -127,47 +145,25 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete your account? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              if (auth.currentUser) {
-                await auth.currentUser.delete();
-                Alert.alert('Account Deleted', 'Your account has been deleted.');
-                router.replace('/register');
-              } else {
-                throw new Error('No user is currently signed in.');
-              }
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to delete account.');
-            }
-          },
-        },
-      ]
-    );
-  };
-
   return (
     <View style={styles.container}>
         <ScrollView>
             <View style={styles.content}>
-                {/* Back Button */}
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
+                {/* Header Section */}
+                <View style={styles.header}>
+                  {/* Back Button */}
+                  <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
                     <Icon name="arrow-back-outline" size={24} color="#000" />
-                </TouchableOpacity>
-
-                {/* Header */}
-                <Text style={styles.header}>Profile</Text>
+                  </TouchableOpacity>
+        
+                  {/* Title */}
+                  <Text style={styles.title}>Profile</Text>
+        
+                  {/* Settings Button */}
+                  <TouchableOpacity onPress={() => console.log('Settings clicked')} style={styles.iconButton}>
+                    <Icon name="settings-outline" size={24} color="#000" />
+                  </TouchableOpacity>
+                </View>
 
                 {/* Profile Picture */}
                 <View style={styles.profilePictureContainer}>
@@ -178,6 +174,7 @@ export default function ProfileScreen() {
                         : require('@/assets/images/avatar-placeholder.jpg') 
                     }
                     style={styles.profilePicture}
+                    onError={() => setPhotoURL(null)}
                   />
                   <TouchableOpacity style={styles.editPhotoButton} onPress={handleEditPhoto}>
                     <Icon name="pencil" size={16} color="#fff" />
@@ -204,7 +201,7 @@ export default function ProfileScreen() {
 
                     <Text style={styles.label}>New Password</Text>
                     <Text style={styles.description}>
-                        * To change your password, you must first enter your current password for verification.
+                        * Input your current password below for verification to change password.
                     </Text>
                     <View style={styles.passwordContainer}>
                         <TextInput
@@ -257,14 +254,6 @@ export default function ProfileScreen() {
                         <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 </View>
-
-                {/* Danger Zone */}
-                <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={handleDeleteAccount}
-                >
-                    <Text style={styles.deleteButtonText}>Delete Account</Text>
-                </TouchableOpacity>
             </View>
         </ScrollView>
     </View>
@@ -278,21 +267,22 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 24,
-    backgroundColor: '#f5f5f5',
-    paddingTop: 36,
-  },
-  backButton: {
-    position: 'relative',
-    top: 34,
-    zIndex: 1000,
+    paddingHorizontal: 18,
+    marginTop: 54,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  iconButton: {
+    padding: 8,
+  },
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4A4A4A',
-    marginBottom: 28,
-    textAlign: 'center',
+    color: '#4A4A4A', // Dark grayish-blue
   },
   profilePictureContainer: {
     alignItems: 'center',
@@ -330,9 +320,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   description: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#666',
-    marginBottom: 8,
+    marginTop: -2,
+    marginBottom: 6,
     lineHeight: 16,
     textAlign: 'left',
     fontStyle: 'italic',
@@ -385,17 +376,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  deleteButton: {
-    backgroundColor: '#D9534F',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  deleteButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

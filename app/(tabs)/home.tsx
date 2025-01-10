@@ -9,30 +9,30 @@ import {
   ScrollView,
 } from 'react-native';
 import { auth } from '@/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'expo-router';
+import { useRouter, useGlobalSearchParams  } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CourseCard from '@/components/ui/CourseCard';
 
 export default function HomePage() {
-  const [name, setName] = useState('Guest');
+  const params = useGlobalSearchParams ();
+  const [name, setName] = useState(auth.currentUser?.displayName || '');
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch the current user details from Firebase Auth
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
       if (user) {
+        await user.reload();
         setName(user.displayName || 'Guest');
         setPhotoURL(user.photoURL || null);
-      } else {
-        setName('Guest');
-        setPhotoURL(null);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    if (params.reload) {
+      fetchUserData();
+    }
+  }, [params]);
 
   const handlePress = () => {
     console.log('Course card pressed');
@@ -83,10 +83,11 @@ export default function HomePage() {
               <Image
                 source={
                   photoURL
-                    ? { uri: photoURL } // Use the user's profile picture
-                    : require('@/assets/images/avatar-placeholder.jpg') // Fallback to default avatar
+                    ? { uri: photoURL }
+                    : require('@/assets/images/avatar-placeholder.jpg')
                 }
                 style={styles.profilePicture}
+                onError={() => setPhotoURL(null)}
               />
             </TouchableOpacity>
           </View>

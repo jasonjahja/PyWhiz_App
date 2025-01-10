@@ -44,7 +44,7 @@ export default function RegisterScreen() {
 
       console.log('User registered:', userCredential.user);
       Alert.alert('Success', 'Account created successfully!');
-      router.replace('(tabs)/home');
+      router.replace('/(tabs)/home');
     } catch (error: any) {
       console.error('Registration error:', error.message);
       Alert.alert('Error', error.message || 'Failed to register.');
@@ -115,7 +115,7 @@ export default function RegisterScreen() {
       <Pressable style={styles.button} onPress={handleRegister} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Registering...' : 'Register'}</Text>
       </Pressable>
-      <Pressable onPress={() => router.push('login')} style={styles.link}>
+      <Pressable onPress={() => router.push('/login')} style={styles.link}>
         <Text style={styles.linkText}>Already have an account? Login</Text>
       </Pressable>
     </View>

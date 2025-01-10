@@ -24,8 +24,8 @@ export default function LoginScreen() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('User logged in:', userCredential.user);
       Alert.alert('Success', 'Logged in successfully!');
-      router.replace('(tabs)/home');
-    } catch (error) {
+      router.replace('/(tabs)/home');
+    } catch (error: any) {
       console.error('Login error:', error.message);
       Alert.alert('Error', error.message || 'Failed to log in.');
     } finally {
@@ -66,7 +66,7 @@ export default function LoginScreen() {
       <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
       </Pressable>
-      <Pressable onPress={() => router.push('register')} style={styles.link}>
+      <Pressable onPress={() => router.push('/register')} style={styles.link}>
         <Text style={styles.linkText}>Don't have an account? Register</Text>
       </Pressable>
     </View>
