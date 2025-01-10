@@ -14,17 +14,20 @@ import { auth } from '@/firebase';
 import { updateProfile, reauthenticateWithCredential, updatePassword, EmailAuthProvider, signOut } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { useUser } from '@/contexts/UserContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [photoURL, setPhotoURL] = useState<string | null>(null);
-  // const [photoURL, setPhotoURL] = useState<string | null>(auth.currentUser?.photoURL || '');
-  const [name, setName] = useState(auth.currentUser?.displayName || '');
-  const [email] = useState(auth.currentUser?.email || '');
+  // const [photoURL, setPhotoURL] = useState<string | null>(null);
+  const { user, setUser } = useUser();
+  const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
+  const [name, setName] = useState(user?.displayName || '');
+  const [email] = useState(user?.email || '');
   const [oldPassword, setOldPassword] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [oldPasswordVisible, setOldPasswordVisible] = useState(false);
+  
 
   const handleEditPhoto = async () => {
     const user = auth.currentUser;
@@ -42,7 +45,7 @@ export default function ProfileScreen() {
     }
   
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images', // Use string literal
       allowsEditing: true,
       quality: 1,
     });
@@ -51,21 +54,15 @@ export default function ProfileScreen() {
       const selectedImageUri = result.assets[0].uri;
   
       try {
-        // Update the profile picture in Firebase Authentication
         await updateProfile(user, { photoURL: selectedImageUri });
-  
-        // Reload the user to ensure the changes are reflected
         await user.reload();
-  
-        // Update the local state
-        setPhotoURL(user.photoURL);
-  
+        setUser(auth.currentUser); // Update global state
         Alert.alert('Success', 'Profile picture updated successfully!');
       } catch (error: any) {
         Alert.alert('Error', error.message || 'Failed to update profile picture.');
       }
     }
-  };
+  };  
   
   
   const handleSaveChanges = async () => {
@@ -107,6 +104,7 @@ export default function ProfileScreen() {
     if (user.displayName !== name) {
       try {
         await updateProfile(user, { displayName: name });
+        setUser(auth.currentUser);
         Alert.alert('Success', 'Profile updated successfully!');
       } catch (error: any) {
         Alert.alert('Error', error.message || 'Failed to update profile.');
@@ -124,25 +122,22 @@ export default function ProfileScreen() {
    
 
   const handleLogout = () => {
-    Alert.alert(
-      'Confirm Logout',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut(auth);
-              router.replace('/');
-            } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to log out.');
-            }
-          },
+    Alert.alert('Confirm Logout', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut(auth);
+            setUser(null); // Clear the UserContext
+            router.replace('/');
+          } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to log out.');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -169,12 +164,12 @@ export default function ProfileScreen() {
                 <View style={styles.profilePictureContainer}>
                   <Image
                     source={
-                      photoURL
-                        ? { uri: photoURL }
-                        : require('@/assets/images/avatar-placeholder.jpg') 
+                      user?.photoURL
+                        ? { uri: `${user?.photoURL}?t=${new Date().getTime()}` }
+                        : require('@/assets/images/avatar-placeholder.jpg')
                     }
                     style={styles.profilePicture}
-                    onError={() => setPhotoURL(null)}
+                    onError={() => setPhotoURL(null)} // Optional error handling
                   />
                   <TouchableOpacity style={styles.editPhotoButton} onPress={handleEditPhoto}>
                     <Icon name="pencil" size={16} color="#fff" />

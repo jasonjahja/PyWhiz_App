@@ -12,27 +12,29 @@ import { auth } from '@/firebase';
 import { useRouter, useGlobalSearchParams  } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CourseCard from '@/components/ui/CourseCard';
+import { useUser } from '@/contexts/UserContext';
 
 export default function HomePage() {
   const params = useGlobalSearchParams ();
   const [name, setName] = useState(auth.currentUser?.displayName || '');
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const router = useRouter();
+  const { user } = useUser();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        await user.reload();
-        setName(user.displayName || 'Guest');
-        setPhotoURL(user.photoURL || null);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     const user = auth.currentUser;
+  //     if (user) {
+  //       await user.reload();
+  //       setName(user.displayName || 'Guest');
+  //       setPhotoURL(user.photoURL || null);
+  //     }
+  //   };
 
-    if (params.reload) {
-      fetchUserData();
-    }
-  }, [params]);
+  //   if (params.reload) {
+  //     fetchUserData();
+  //   }
+  // }, [params]);
 
   const handlePress = () => {
     console.log('Course card pressed');
@@ -68,7 +70,7 @@ export default function HomePage() {
           {/* Greeting Section */}
           <View style={styles.greetingContainer}>
             <Text style={styles.greetingText}>
-              Hello, <Text style={styles.userName}>{name}</Text>
+              Hello, <Text style={styles.userName}>{user?.displayName || 'Guest'}</Text>
             </Text>
           </View>
 
@@ -83,7 +85,7 @@ export default function HomePage() {
               <Image
                 source={
                   photoURL
-                    ? { uri: photoURL }
+                    ? { uri: `${user?.photoURL}?t=${new Date().getTime()}` }
                     : require('@/assets/images/avatar-placeholder.jpg')
                 }
                 style={styles.profilePicture}
