@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Switch, Alert, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { auth, signOut } from '@/firebase';
+import { auth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export default function SettingsPage() {
   const [isDarkMode, setIsDarkMode] = useState(false); // Example toggle
@@ -34,6 +35,9 @@ export default function SettingsPage() {
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
+      <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+          <Icon name="chevron-back" size={24} color="#000" />
+      </TouchableOpacity>
       <View style={styles.header}>
         <Text style={styles.title}>Settings</Text>
       </View>
@@ -50,7 +54,7 @@ export default function SettingsPage() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingItem}
-          onPress={() => router.push('/')} // Navigate to account management
+          onPress={() => console.log('account management clicked!')} // Navigate to account management
         >
           <Icon name="settings-outline" size={20} color="#3178C6" style={styles.settingIcon} />
           <Text style={styles.settingText}>Account Management</Text>
@@ -101,9 +105,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 16,
+    paddingVertical: 32,
+  },
+  iconButton: {
+    padding: 8,
+    position: 'absolute',
+    top: 22,
+    left: 2,
+
   },
   header: {
-    marginVertical: 16,
+    marginVertical: 32,
     alignItems: 'center',
   },
   title: {
