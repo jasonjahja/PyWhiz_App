@@ -18,7 +18,6 @@ import { useUser } from '@/contexts/UserContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  // const [photoURL, setPhotoURL] = useState<string | null>(null);
   const { user, setUser } = useUser();
   const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
   const [name, setName] = useState(user?.displayName || '');
@@ -56,7 +55,6 @@ export default function ProfileScreen() {
       try {
         await updateProfile(user, { photoURL: selectedImageUri });
         setPhotoURL(user.photoURL);
-        await user.reload();
         setUser(auth.currentUser); // Update global state
         Alert.alert('Success', 'Profile picture updated successfully!');
       } catch (error: any) {
@@ -111,16 +109,9 @@ export default function ProfileScreen() {
         Alert.alert('Error', error.message || 'Failed to update profile.');
       }
     }
-  
-    // Reload the user to reflect the latest changes
-    try {
-      await user.reload();
-      console.log('User reloaded:', user.displayName, user.photoURL);
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to reload user data.');
-    }
   };
-   
+
+  const isSaveDisabled = user?.displayName === name && password === '' && oldPassword === '';   
 
   const handleLogout = () => {
     Alert.alert('Confirm Logout', 'Are you sure you want to log out?', [
@@ -246,7 +237,7 @@ export default function ProfileScreen() {
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                         <Text style={styles.logoutButtonText}>Logout</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
+                    <TouchableOpacity style={[styles.saveButton, isSaveDisabled && styles.disabledButton]} onPress={handleSaveChanges} disabled={isSaveDisabled}>
                         <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 </View>
@@ -357,6 +348,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#CCC',
   },
   saveButtonText: {
     color: '#fff',

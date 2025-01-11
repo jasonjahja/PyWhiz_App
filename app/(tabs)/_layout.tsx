@@ -5,23 +5,25 @@ import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { LightTheme } from '@/themes/LightTheme';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors.light.tint, // Explicitly use light tint
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
+            backgroundColor: LightTheme.colors.background, // Match LightTheme
             position: 'absolute',
+          },
+          android: {
+            backgroundColor: LightTheme.colors.background,
+            elevation: 5,
           },
           default: {},
         }),
@@ -34,10 +36,11 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               size={28}
-              name={focused ? 'home' : 'home-outline'} // Filled icon when focused
+              name={focused ? 'home' : 'home-outline'}
               color={color}
             />
           ),
+          tabBarAccessibilityLabel: 'Home Screen',
         }}
       />
       <Tabs.Screen
@@ -47,10 +50,11 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               size={28}
-              name={focused ? 'book' : 'book-outline'} // Filled icon when focused
+              name={focused ? 'book' : 'book-outline'}
               color={color}
             />
           ),
+          tabBarAccessibilityLabel: 'Module Screen',
         }}
       />
       <Tabs.Screen
@@ -60,10 +64,11 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Icon
               size={28}
-              name={focused ? 'person' : 'person-outline'} // Filled icon when focused
+              name={focused ? 'person' : 'person-outline'}
               color={color}
             />
           ),
+          tabBarAccessibilityLabel: 'Profile Screen',
         }}
       />
     </Tabs>

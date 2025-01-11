@@ -63,7 +63,7 @@ export default function HomePage() {
           <Text style={styles.title}>My Courses</Text>
 
           {/* Search Button */}
-          <TouchableOpacity onPress={() => console.log('Search clicked')} style={styles.iconButton}>
+          <TouchableOpacity onPress={() => router.push('/search')} style={styles.iconButton}>
             <Icon name="search-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>

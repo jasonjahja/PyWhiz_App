@@ -1,35 +1,34 @@
 import { Image, StyleSheet, ScrollView } from 'react-native';
 import Navbar from '@/components/ui/Navbar';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Text, View } from 'react-native';
 
 export default function LandingPage() {
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <Navbar />
 
       {/* Main Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <ThemedView style={styles.content}>
+        <View style={styles.content}>
           {/* Hero Section */}
-          <ThemedView style={styles.heroSection}>
-            <ThemedText style={styles.mainTitle}>Belajar Python</ThemedText>
-            <ThemedText style={styles.subTitle}>Sekarang!</ThemedText>
-            <ThemedText style={styles.description}>
+          <View style={styles.heroSection}>
+            <Text style={styles.mainTitle}>Learn Python</Text>
+            <Text style={styles.subTitle}>Today!</Text>
+            <Text style={styles.description}>
               Learn Python in a simple and enjoyable way, one step at a time,
               and boost your skills in just a few minutes each day.
-            </ThemedText>
-          </ThemedView>
+            </Text>
+          </View>
 
           {/* Image Grid */}
-          <ThemedView style={styles.imageGrid}>
+          <View style={styles.imageGrid}>
             <Image
               source={require('@/assets/images/python-logo-large.png')}
               style={styles.pythonLogo}
             />
 
-            <ThemedView style={styles.smallImagesContainer}>
+            <View style={styles.smallImagesContainer}>
               {/* Smaller Images */}
               <Image
                 source={require('@/assets/images/code-sample-1.png')}
@@ -47,18 +46,18 @@ export default function LandingPage() {
                 source={require('@/assets/images/developer.png')}
                 style={styles.smallImage}
               />
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
+            </View>
+          </View>
+        </View>
 
         {/* Footer */}
-        <ThemedView style={styles.footer}>
-          <ThemedText style={styles.footerText}>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
             Made by Jason Jahja (18222116) - Anindita Widya Santoso (18222128)
-          </ThemedText>
-        </ThemedView>
+          </Text>
+        </View>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -137,5 +136,6 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#666',
     fontSize: 14,
+    lineHeight: 24,
   },
 });

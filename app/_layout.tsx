@@ -1,4 +1,5 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
+import { LightTheme } from '@/themes/LightTheme';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -7,16 +8,15 @@ import 'react-native-reanimated';
 import { View, StyleSheet, Image, Text } from 'react-native';
 
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/firebase'; // Your Firebase configuration
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserProvider } from '@/contexts/UserContext'; // Import UserProvider
-import { Slot } from 'expo-router'; // Import Slot for dynamic routing
+import { auth } from '@/firebase'; 
+import { UserProvider } from '@/contexts/UserContext'; 
+import { Slot } from 'expo-router'; 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -52,8 +52,7 @@ export default function RootLayout() {
   return (
     // Wrap everything in UserProvider
     <UserProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        {/* Dynamically render the current route */}
+      <ThemeProvider value={LightTheme}>
         <Slot />
         <StatusBar style="auto" />
       </ThemeProvider>

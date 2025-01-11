@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
-  TextInput,
   ScrollView,
 } from 'react-native';
-import { auth } from '@/firebase';
 import { useRouter, useGlobalSearchParams  } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CourseCard from '@/components/ui/CourseCard';
 import { useUser } from '@/contexts/UserContext';
 
 export default function HomePage() {
-  const params = useGlobalSearchParams();
+  useGlobalSearchParams();
   const { user } = useUser();
   const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
   const router = useRouter();
@@ -23,7 +21,6 @@ export default function HomePage() {
   const handlePress = () => {
     console.log('Course card pressed');
   };
-
 
   return (
     <View style={styles.container}>
@@ -62,7 +59,7 @@ export default function HomePage() {
           {/* Background Illustration */}
           <View style={styles.background}>
             <Image
-              source={require('@/assets/images/python-logo.png')} // Replace with your image path
+              source={require('@/assets/images/python-logo.png')}
               style={styles.illustration}
               resizeMode="contain"
             />
@@ -73,14 +70,10 @@ export default function HomePage() {
             <Text style={styles.title}>Find a course you want to learn</Text>
 
             {/* Search Input */}
-            <View style={styles.searchContainer}>
+            <TouchableOpacity style={styles.searchContainer} onPress={() => router.push('/search')}>
               <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search Course"
-                placeholderTextColor="#aaa"
-              />
-            </View>
+              <Text style={styles.searchPlaceholder}>Search Course</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -145,11 +138,11 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#4A4A4A', // Dark grayish-blue
+    color: '#4A4A4A',
   },
   userName: {
     fontWeight: 'bold',
-    color: '#3178C6', // Accent color
+    color: '#3178C6',
   },
   profilePictureWrapper: {
     position: 'relative',
@@ -160,8 +153,8 @@ const styles = StyleSheet.create({
   },
   circleOutline: {
     position: 'absolute',
-    borderWidth: 2,
-    borderColor: '#3178C6', // Circle outline color
+    borderWidth: 3,
+    borderColor: '#3178C6',
     borderRadius: 9999,
   },
   mediumCircle: {
@@ -186,23 +179,6 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-
-  // greeting: {
-  //   marginTop: 136,
-  //   marginBottom: 8,
-  //   fontSize: 20,
-  //   fontWeight: 'bold',
-  //   color: '#333',
-  // },
-  // searchContainer: {
-  //   marginBottom: 24,
-  // },
-  // title: {
-  //   fontSize: 20,
-  //   fontWeight: 'bold',
-  //   marginBottom: 12,
-  //   color: '#333',
-  // },
   heroContainer: {
     position: 'relative',
     backgroundColor: '#E0F7F5',
@@ -252,10 +228,11 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     marginRight: 12,
   },
-  searchInput: {
+  searchPlaceholder: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: "#aaa",
+    paddingVertical: 6,
   },
   categoriesContainer: {
     marginBottom: 24,
