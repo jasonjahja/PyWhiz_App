@@ -7,7 +7,7 @@ type StretchedCourseCardProps = {
   title: string; // Course title
   progress: number; // Progress percentage
   category: string; // Course category
-  videos: string; // Videos watched info (e.g., "4/6 Video")
+  videos: number; // Videos watched info (e.g., "4/6 Video")
 };
 
 const StretchedCourseCard: React.FC<StretchedCourseCardProps> = ({
@@ -30,7 +30,7 @@ const StretchedCourseCard: React.FC<StretchedCourseCardProps> = ({
         </View>
         <Text style={styles.courseTitle}>{title}</Text>
         <View style={styles.courseProgress}>
-          <Text style={styles.courseProgressText}>{videos}</Text>
+          <Text style={styles.courseProgressText}>{videos}/6 videos</Text>
           <Text style={styles.courseProgressPercentage}>{progress}%</Text>
         </View>
         <View style={styles.progressBar}>

@@ -12,13 +12,52 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import CourseCard from '@/components/ui/CourseCard';
 import { useUser } from '@/contexts/UserContext';
 
+const courses = [
+  {
+    id: '1',
+    image: require('@/assets/images/python-logo.png'),
+    category: 'Beginner',
+    title: 'Module 1 - Python Print',
+    duration: 50,
+    users: 24,
+  },
+  {
+    id: '2',
+    image: require('@/assets/images/python-logo.png'),
+    category: 'Intermediate',
+    title: 'Module 2 - Loops',
+    duration: 40,
+    users: 15,
+  },
+  {
+    id: '3',
+    image: require('@/assets/images/python-logo.png'),
+    category: 'Expert',
+    title: 'Module 3 - Advanced Functions',
+    duration: 60,
+    users: 10,
+  },
+];
+
 export default function HomePage() {
   useGlobalSearchParams();
+  const router = useRouter();
   const { user } = useUser();
   const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
-  const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState<string>('Beginner');
+  const [filteredCourse, setFilteredCourse] = useState(
+    courses.find((course) => course.category === 'Beginner') || null
+  );
 
-  const handlePress = () => {
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    const mostPopularCourse = courses
+      .filter((course) => course.category === category)
+      .sort((a, b) => b.users - a.users)[0]; // Select most popular
+    setFilteredCourse(mostPopularCourse);
+  };
+
+  const handleCoursePress = () => {
     console.log('Course card pressed');
   };
 
@@ -81,13 +120,31 @@ export default function HomePage() {
         <View style={styles.categoriesContainer}>
           <Text style={styles.sectionTitle}>Level</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity style={[styles.categoryButton, styles.blueCategory]}>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === 'Beginner' ? styles.blueCategory : styles.grayCategory,
+              ]}
+              onPress={() => handleCategorySelect('Beginner')}
+            >
               <Text style={styles.categoryText}>Beginner</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryButton, styles.grayCategory]}>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === 'Intermediate' ? styles.blueCategory : styles.grayCategory,
+              ]}
+              onPress={() => handleCategorySelect('Intermediate')}
+            >
               <Text style={styles.categoryText}>Intermediate</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryButton, styles.grayCategory]}>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === 'Expert' ? styles.blueCategory : styles.grayCategory,
+              ]}
+              onPress={() => handleCategorySelect('Expert')}
+            >
               <Text style={styles.categoryText}>Expert</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -96,16 +153,18 @@ export default function HomePage() {
         {/* Popular Courses Section */}
         <View style={styles.popularCoursesContainer}>
           <Text style={styles.sectionTitle}>Learn Our Most Popular Course</Text>
-          <View style={styles.coursesRow}>
+          {filteredCourse ? (
             <CourseCard
-              image={require('@/assets/images/python-logo.png')} // Replace with your course image
-              category='Beginner'
-              title="Module 1 - Python Print"
-              duration="50 Min"
-              users="24 Users"
-              onPress={handlePress}
+              image={filteredCourse.image}
+              category={filteredCourse.category}
+              title={filteredCourse.title}
+              duration={filteredCourse.duration}
+              users={filteredCourse.users}
+              onPress={handleCoursePress}
             />
-          </View>
+          ) : (
+            <Text style={styles.noCoursesText}>No courses available in this category.</Text>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -266,5 +325,10 @@ const styles = StyleSheet.create({
   coursesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  noCoursesText: {
+    fontSize: 14,
+    color: '#888',
+    textAlign: 'center',
   },
 });

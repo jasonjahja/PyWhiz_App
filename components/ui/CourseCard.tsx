@@ -6,8 +6,8 @@ type CourseCardProps = {
   image: any; // Course image
   category: string; // Course category
   title: string; // Course title
-  duration: string; // Course duration
-  users: string; // Number of users
+  duration: number; // Course duration
+  users: number; // Number of users
   onPress: () => void; // Function to handle card press
 };
 
@@ -22,11 +22,11 @@ const CourseCard: React.FC<CourseCardProps> = ({ image, category, title, duratio
       <View style={styles.courseFooter}>
         <View style={styles.footerItem}>
           <Icon name="time-outline" size={16} color="#888" style={styles.footerIcon} />
-          <Text style={styles.courseDuration}>{duration}</Text>
+          <Text style={styles.courseDuration}>{duration} Min</Text>
         </View>
         <View style={styles.footerItem}>
           <Icon name="people-outline" size={16} color="#888" style={styles.footerIcon} />
-          <Text style={styles.courseUsers}>{users}</Text>
+          <Text style={styles.courseUsers}>{users} Users</Text>
         </View>
       </View>
     </TouchableOpacity>

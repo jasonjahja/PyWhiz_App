@@ -14,9 +14,72 @@ import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import StretchedCourseCard from '@/components/ui/StretchedCourseCards';
 
+const allCourses = [
+  {
+    id: '1',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 1 - Python Print',
+    progress: 60,
+    category: 'Beginner',
+    videos: 4,
+  },
+  {
+    id: '2',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 2 - Conditional',
+    progress: 10,
+    category: 'Beginner',
+    videos: 4,
+  },
+  {
+    id: '3',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 3 - Loops',
+    progress: 5,
+    category: 'Beginner',
+    videos: 4,
+  },
+  {
+    id: '4',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 4 - Functions',
+    progress: 0,
+    category: 'Beginner',
+    videos: 4,
+  },
+  {
+    id: '5',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 5 - Advanced Loops',
+    progress: 40,
+    category: 'Intermediate',
+    videos: 6,
+  },
+  {
+    id: '6',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 6 - Data Structures',
+    progress: 30,
+    category: 'Intermediate',
+    videos: 5,
+  },
+  {
+    id: '7',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 7 - Algorithms',
+    progress: 0,
+    category: 'Expert',
+    videos: 7,
+  },
+];
+
 export default function HomePage() {
   const [name, setName] = useState('');
   const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState('Beginner'); // Track selected category
+  const [filteredCourses, setFilteredCourses] = useState(
+    allCourses.filter((course) => course.category === 'Beginner')
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -30,33 +93,23 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
-  const handleCoursePress = () => {
-    // Navigate to a different page
-    console.log('Course Pressed');
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setFilteredCourses(allCourses.filter((course) => course.category === category));
+  };
+
+  const handleCoursePress = (course: string) => {
+    console.log('Course Pressed:', course);
   };
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
-        {/* Search Section */}
-        {/* <View style={styles.searchContainer}>
-          <View style={styles.searchBox}>
-            <TextInput
-              placeholder="Search Course"
-              style={styles.searchInput}
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity style={styles.searchButton}>
-              <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
-            </TouchableOpacity>
-          </View>
-        </View> */}
-
         {/* Header Section */}
         <View style={styles.header}>
           {/* Back Button */}
           <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-            <Icon name="arrow-back-outline" size={24} color="#000" />
+            <Icon name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
 
           {/* Title */}
@@ -71,16 +124,31 @@ export default function HomePage() {
         {/* Categories Section */}
         <View style={styles.categoriesContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity style={[styles.categoryButton, styles.blueCategory]}>
-              <Icon name="options-outline" size={20} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryButton, styles.grayCategory]}>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === 'Beginner' ? styles.blueCategory : styles.grayCategory,
+              ]}
+              onPress={() => handleCategorySelect('Beginner')}
+            >
               <Text style={styles.categoryText}>Beginner</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryButton, styles.grayCategory]}>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === 'Intermediate' ? styles.blueCategory : styles.grayCategory,
+              ]}
+              onPress={() => handleCategorySelect('Intermediate')}
+            >
               <Text style={styles.categoryText}>Intermediate</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.categoryButton, styles.grayCategory]}>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                selectedCategory === 'Expert' ? styles.blueCategory : styles.grayCategory,
+              ]}
+              onPress={() => handleCategorySelect('Expert')}
+            >
               <Text style={styles.categoryText}>Expert</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -104,40 +172,19 @@ export default function HomePage() {
           </View>
         </View>
 
-        {/* Courses Section */}
+        {/* Filtered Courses Section */}
         <View style={styles.coursesContainer}>
-          <StretchedCourseCard
-            onPress={handleCoursePress}
-            thumbnail={require('@/assets/images/python-logo.png')}
-            title="Module 1 - Python Print"
-            progress={60}
-            category="Beginner"
-            videos="4/6 Video"
-          />
-          <StretchedCourseCard
-            onPress={handleCoursePress}
-            thumbnail={require('@/assets/images/python-logo.png')}
-            title="Module 2 - Conditional"
-            progress={10}
-            category="Beginner"
-            videos="4/6 Video"
-          />
-          <StretchedCourseCard
-            onPress={handleCoursePress}
-            thumbnail={require('@/assets/images/python-logo.png')}
-            title="Module 3 - Loops"
-            progress={5}
-            category="Beginner"
-            videos="4/6 Video"
-          />
-          <StretchedCourseCard
-            onPress={handleCoursePress}
-            thumbnail={require('@/assets/images/python-logo.png')}
-            title="Module 4 - Functions"
-            progress={0}
-            category="Beginner"
-            videos="4/6 Video"
-          />
+          {filteredCourses.map((course) => (
+            <StretchedCourseCard
+              key={course.id}
+              onPress={() => handleCoursePress(course.title)}
+              thumbnail={course.thumbnail}
+              title={course.title}
+              progress={course.progress}
+              category={course.category}
+              videos={course.videos}
+            />
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -154,30 +201,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     marginTop: 54,
   },
-  // searchContainer: {
-  //   marginTop: 136,
-  //   marginBottom: 12,
-  // },
-  // searchBox: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: '#F5F5F5',
-  //   borderRadius: 8,
-  //   paddingHorizontal: 12,
-  //   height: 50,
-  // },
-  // searchInput: {
-  //   flex: 1,
-  //   fontSize: 16,
-  //   color: '#333',
-  // },
-  // searchButton: {
-  //   marginLeft: 8,
-  // },
-  // searchIcon: {
-  //   marginRight: 8,
-  // },
-
   // Header Section
   header: {
     flexDirection: 'row',
@@ -191,7 +214,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4A4A4A', // Dark grayish-blue
+    color: '#4A4A4A',
   },
   // Categories Section
   categoriesContainer: {
@@ -234,7 +257,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     flexDirection: 'row',
     alignItems: 'center',
-    height: '20%',
+    height: 200,
     elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,

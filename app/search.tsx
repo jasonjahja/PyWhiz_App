@@ -3,54 +3,113 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
-  FlatList,
   TouchableOpacity,
+  FlatList,
+  Image,
+  StyleSheet,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-const mockData = [
-  { id: '1', title: 'Learn Python Basics' },
-  { id: '2', title: 'Advanced Python Techniques' },
-  { id: '3', title: 'Data Analysis with Python' },
-  { id: '4', title: 'Web Development with Django' },
-  { id: '5', title: 'Machine Learning with Python' },
+// Updated Dummy Data
+const initialResults: Array<{
+  id: string;
+  thumbnail: any;
+  title: string;
+  progress: number;
+  category: string;
+  videos: string;
+}> = [
+  {
+    id: '1',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 1 - Python Print',
+    progress: 60,
+    category: 'Beginner',
+    videos: '4/6 Video',
+  },
+  {
+    id: '2',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 2 - Conditional',
+    progress: 10,
+    category: 'Beginner',
+    videos: '4/6 Video',
+  },
+  {
+    id: '3',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 3 - Loops',
+    progress: 5,
+    category: 'Beginner',
+    videos: '4/6 Video',
+  },
+  {
+    id: '4',
+    thumbnail: require('@/assets/images/python-logo.png'),
+    title: 'Module 4 - Functions',
+    progress: 0,
+    category: 'Beginner',
+    videos: '4/6 Video',
+  },
 ];
 
-export default function SearchPage() {
-  const [searchText, setSearchText] = useState('');
-  const [filteredData, setFilteredData] = useState(mockData);
+export default function SearchScreen() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [results, setResults] = useState(initialResults);
 
   const handleSearch = (text: string) => {
-    setSearchText(text);
-    const filtered = mockData.filter((item) =>
+    setSearchQuery(text);
+    const filtered = initialResults.filter((item) =>
       item.title.toLowerCase().includes(text.toLowerCase())
     );
-    setFilteredData(filtered);
+    setResults(filtered);
   };
+
+  const renderSearchResult = ({ item }: { item: typeof initialResults[0] }) => (
+    <TouchableOpacity style={styles.resultItem} onPress={() => console.log(`Selected: ${item.title}`)}>
+      <Image source={item.thumbnail} style={styles.resultImage} />
+      <View style={styles.resultText}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.details}>{item.category}</Text>
+        <Text style={styles.details}>{item.videos}</Text>
+      </View>
+      <View style={styles.progressContainer}>
+        <Text style={styles.progressText}>{item.progress}%</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      {/* Search Input */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search courses..."
-        value={searchText}
-        onChangeText={handleSearch}
-        autoFocus={true} // Focus the input automatically
-      />
+      {/* Search Header */}
+      <View style={styles.searchContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Icon name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <View style={styles.searchBar}>
+          <TextInput
+            value={searchQuery}
+            onChangeText={handleSearch}
+            placeholder="Search"
+            style={styles.searchInput}
+          />
+          <TouchableOpacity style={styles.searchButton}>
+            <Icon name="search" size={20} color="#888" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {/* Search Results */}
+      <Text style={styles.sectionTitle}>Search result</Text>
+
       <FlatList
-        data={filteredData}
+        data={results}
+        renderItem={renderSearchResult}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.resultItem} onPress={() => console.log(item.title)}>
-            <Text style={styles.resultText}>{item.title}</Text>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No results found. Try another search.</Text>
-        }
+        style={styles.resultsList}
+        ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
       />
     </View>
   );
@@ -59,31 +118,85 @@ export default function SearchPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fff',
+    paddingTop: 54,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  backButton: {
+    marginRight: 12,
+  },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 100,
+    paddingHorizontal: 16,
   },
   searchInput: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    flex: 1,
+    height: 40,
     fontSize: 16,
+    includeFontPadding: false,
+  },
+  searchButton: {
+    padding: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 16,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  resultsList: {
+    flex: 1,
+    paddingHorizontal: 8,
   },
   resultItem: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#F0F0F0',
+  },
+  resultImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 14,
   },
   resultText: {
+    flex: 1,
+  },
+  title: {
     fontSize: 16,
-    color: '#333',
+    fontWeight: '500',
+    color: '#000',
+  },
+  details: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  progressContainer: {
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4CAF50',
   },
   emptyText: {
     textAlign: 'center',
+    fontSize: 16,
     color: '#888',
     marginTop: 20,
-    fontSize: 16,
   },
 });

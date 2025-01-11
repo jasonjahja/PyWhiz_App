@@ -140,7 +140,7 @@ export default function ProfileScreen() {
                 <View style={styles.header}>
                   {/* Back Button */}
                   <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-                    <Icon name="arrow-back-outline" size={24} color="#000" />
+                    <Icon name="chevron-back" size={24} color="#000" />
                   </TouchableOpacity>
         
                   {/* Title */}
