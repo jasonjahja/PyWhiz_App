@@ -15,26 +15,10 @@ import CourseCard from '@/components/ui/CourseCard';
 import { useUser } from '@/contexts/UserContext';
 
 export default function HomePage() {
-  const params = useGlobalSearchParams ();
+  const params = useGlobalSearchParams();
   const { user } = useUser();
   const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
   const router = useRouter();
-  
-
-  // useEffect(() => {
-  //   const fetchUserData = async () => {
-  //     const user = auth.currentUser;
-  //     if (user) {
-  //       await user.reload();
-  //       setName(user.displayName || 'Guest');
-  //       setPhotoURL(user.photoURL || null);
-  //     }
-  //   };
-
-  //   if (params.reload) {
-  //     fetchUserData();
-  //   }
-  // }, [params]);
 
   const handlePress = () => {
     console.log('Course card pressed');
@@ -44,27 +28,6 @@ export default function HomePage() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
-        {/* Greeting Section */}
-        {/* <Text style={styles.greeting}>Hi, {name}</Text> */}
-
-        {/* Search Section */}
-        {/* <View style={styles.searchContainer}>
-          <Text style={styles.title}>Find a course you want to learn</Text>
-          <View style={styles.searchBox}>
-            <TextInput
-              placeholder="Search Course"
-              style={styles.searchInput}
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity style={styles.searchButton}>
-              <Image
-                source={require('@/assets/images/python-logo.png')} // Replace with your search icon
-                style={styles.searchIcon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View> */}
-
         {/* Header Section */}
         <View style={styles.header}>
           {/* Greeting Section */}

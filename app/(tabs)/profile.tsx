@@ -55,6 +55,7 @@ export default function ProfileScreen() {
   
       try {
         await updateProfile(user, { photoURL: selectedImageUri });
+        setPhotoURL(user.photoURL);
         await user.reload();
         setUser(auth.currentUser); // Update global state
         Alert.alert('Success', 'Profile picture updated successfully!');
