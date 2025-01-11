@@ -84,7 +84,7 @@ export default function HomePage() {
               <Image
                 source={
                   photoURL
-                    ? { uri: `${user?.photoURL}?t=${new Date().getTime()}` }
+                    ? { uri: user?.photoURL }
                     : require('@/assets/images/avatar-placeholder.jpg')
                 }
                 style={styles.profilePicture}

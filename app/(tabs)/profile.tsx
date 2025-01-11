@@ -20,6 +20,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, setUser } = useUser();
   const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
+  const [tempPhotoURL, setTempPhotoURL] = useState<string | null>(null); // Temporary photo URL
   const [name, setName] = useState(user?.displayName || '');
   const [email] = useState(user?.email || '');
   const [oldPassword, setOldPassword] = useState('');
@@ -30,38 +31,31 @@ export default function ProfileScreen() {
 
   const handleEditPhoto = async () => {
     const user = auth.currentUser;
-  
+
     if (!user) {
       Alert.alert('Error', 'No user is currently signed in.');
       return;
     }
-  
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
+
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'We need permissions to access your gallery.');
       return;
     }
-  
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images', // Use string literal
+      mediaTypes: 'images',
       allowsEditing: true,
       quality: 1,
     });
-  
+
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri;
-  
-      try {
-        await updateProfile(user, { photoURL: selectedImageUri });
-        setPhotoURL(user.photoURL);
-        setUser(auth.currentUser); // Update global state
-        Alert.alert('Success', 'Profile picture updated successfully!');
-      } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to update profile picture.');
-      }
+      setTempPhotoURL(selectedImageUri); // Temporarily store the selected image URI
+      Alert.alert('Info', 'Profile picture will be saved when you click "Save Changes".');
     }
-  };  
+  };
   
   
   const handleSaveChanges = async () => {
@@ -109,9 +103,22 @@ export default function ProfileScreen() {
         Alert.alert('Error', error.message || 'Failed to update profile.');
       }
     }
+
+     // Save the new photo URL if there is a temporary photo URL
+     if (tempPhotoURL && tempPhotoURL !== photoURL) {
+      try {
+        await updateProfile(user, { photoURL: tempPhotoURL });
+        setPhotoURL(tempPhotoURL); // Update local state after saving
+        setTempPhotoURL(null); // Clear temporary state
+        Alert.alert('Success', 'Profile updated successfully!');
+      } catch (error: any) {
+        Alert.alert('Error', error.message || 'Failed to update profile picture.');
+        return;
+      }
+    }
   };
 
-  const isSaveDisabled = user?.displayName === name && password === '' && oldPassword === '';   
+  const isSaveDisabled = user?.displayName === name && password === '' && oldPassword === '' && !tempPhotoURL;;   
 
   const handleLogout = () => {
     Alert.alert('Confirm Logout', 'Are you sure you want to log out?', [
@@ -147,7 +154,7 @@ export default function ProfileScreen() {
                   <Text style={styles.title}>Profile</Text>
         
                   {/* Settings Button */}
-                  <TouchableOpacity onPress={() => console.log('Settings clicked')} style={styles.iconButton}>
+                  <TouchableOpacity onPress={() => router.push('/settings')} style={styles.iconButton}>
                     <Icon name="settings-outline" size={24} color="#000" />
                   </TouchableOpacity>
                 </View>
@@ -156,12 +163,14 @@ export default function ProfileScreen() {
                 <View style={styles.profilePictureContainer}>
                   <Image
                     source={
-                      photoURL
-                        ? { uri: `${user?.photoURL}?t=${new Date().getTime()}` }
+                      tempPhotoURL
+                        ? { uri: tempPhotoURL }
+                        : photoURL
+                        ? { uri: photoURL }
                         : require('@/assets/images/avatar-placeholder.jpg')
                     }
                     style={styles.profilePicture}
-                    onError={() => setPhotoURL(null)} // Optional error handling
+                    onError={() => setTempPhotoURL(null)} // Optional error handling
                   />
                   <TouchableOpacity style={styles.editPhotoButton} onPress={handleEditPhoto}>
                     <Icon name="pencil" size={16} color="#fff" />

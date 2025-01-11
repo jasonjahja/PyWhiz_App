@@ -18,6 +18,21 @@ const StretchedCourseCard: React.FC<StretchedCourseCardProps> = ({
   category,
   videos,
 }) => {
+  const getCategoryStyle = () => {
+    switch (category) {
+      case 'Beginner':
+        return { backgroundColor: '#E0F7FA', textColor: '#3178C6' };
+      case 'Intermediate':
+        return { backgroundColor: '#FFF3CD', textColor: '#856404' };
+      case 'Expert':
+        return { backgroundColor: '#F8D7DA', textColor: '#842029' };
+      default:
+        return { backgroundColor: '#E0E0E0', textColor: '#333' };
+    }
+  };
+  
+  const categoryStyle = getCategoryStyle();
+  
   return (
     <TouchableOpacity style={styles.stretchedCourseCard} onPress={onPress}>
       <Image
@@ -25,8 +40,10 @@ const StretchedCourseCard: React.FC<StretchedCourseCardProps> = ({
         style={styles.courseImage}
       />
       <View style={styles.courseContent}>
-        <View style={styles.courseCategory}>
-          <Text style={styles.courseCategoryText}>{category}</Text>
+        <View style={[styles.courseCategory, { backgroundColor: categoryStyle.backgroundColor }]}>
+          <Text style={[styles.courseCategoryText, { color: categoryStyle.textColor }]}>
+            {category}
+          </Text>
         </View>
         <Text style={styles.courseTitle}>{title}</Text>
         <View style={styles.courseProgress}>

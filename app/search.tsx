@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   progressText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#3178C6',
   },
   emptyText: {
     textAlign: 'center',

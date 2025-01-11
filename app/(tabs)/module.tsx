@@ -154,6 +154,7 @@ export default function HomePage() {
           </ScrollView>
         </View>
 
+        {/* Hero Section */}
         <Text style={styles.aboveHeroTitle}>Latest Learned</Text>
         <View style={styles.heroContainer}>
           {/* Background Illustration */}
