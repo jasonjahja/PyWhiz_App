@@ -43,6 +43,7 @@ export default function LoginScreen() {
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
+        placeholderTextColor="#888"
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -51,6 +52,7 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!passwordVisible} // Toggle secureTextEntry
+          placeholderTextColor="#888"
         />
         <TouchableOpacity
           onPress={() => setPasswordVisible(!passwordVisible)}

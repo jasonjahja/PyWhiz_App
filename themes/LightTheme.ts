@@ -2,12 +2,14 @@ import { DefaultTheme } from '@react-navigation/native';
 
 export const LightTheme = {
   ...DefaultTheme,
+  dark: false,
   colors: {
     ...DefaultTheme.colors,
-    background: '#ffffff', // Set light background color
-    card: '#f9f9f9',       // Set card color
-    text: '#000000',       // Set text color
-    border: '#e0e0e0',     // Set border color
-    primary: '#007BFF',    // Set primary color
+    background: '#ffffff',
+    text: '#000000',       
+    card: '#f9f9f9',       
+    border: '#e0e0e0',     
+    notification: '#ff0000', 
+    primary: '#007BFF',    
   },
 };

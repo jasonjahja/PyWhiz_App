@@ -52,9 +52,14 @@ export default function RootLayout() {
   return (
     // Wrap everything in UserProvider
     <UserProvider>
-      <ThemeProvider value={LightTheme}>
+      <ThemeProvider
+        value={{
+          ...LightTheme,
+          dark: false,
+        }}
+      >
         <Slot />
-        <StatusBar style="auto" />
+        <StatusBar style="dark" />
       </ThemeProvider>
     </UserProvider>
   );
