@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,108 +10,107 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase';
 
-// Updated Dummy Data
-const initialResults: Array<{
+interface Course {
   id: string;
-  thumbnail: any;
+  thumbnail: string; // Path to image in storage or local asset
   title: string;
   progress: number;
   category: string;
   videos: string;
-}> = [
-  {
-    id: '1',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 1 - Python Print',
-    progress: 60,
-    category: 'Beginner',
-    videos: '4/6 Video',
-  },
-  {
-    id: '2',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 2 - Conditional',
-    progress: 10,
-    category: 'Beginner',
-    videos: '4/6 Video',
-  },
-  {
-    id: '3',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 3 - Loops',
-    progress: 5,
-    category: 'Beginner',
-    videos: '4/6 Video',
-  },
-  {
-    id: '4',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 4 - Functions',
-    progress: 0,
-    category: 'Beginner',
-    videos: '4/6 Video',
-  },
-];
+}
 
 export default function SearchScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState(initialResults);
+  const [results, setResults] = useState<Course[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
 
+  // Fetch all courses from Firestore on mount
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'module'));
+        const coursesData: Course[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          thumbnail: doc.data().thumbnail || '', // Adjust field if needed
+          title: doc.data().title || '',
+          progress: doc.data().progress || 0,
+          category: doc.data().category || '',
+          videos: `${doc.data().watchedVideos || 0}/${doc.data().totalVideos || 0} Video`,
+        }));
+        setAllCourses(coursesData);
+        setResults(coursesData); // Initially display all courses
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  // Filter results based on search query
   const handleSearch = (text: string) => {
     setSearchQuery(text);
-    const filtered = initialResults.filter((item) =>
-      item.title.toLowerCase().includes(text.toLowerCase())
+    const filtered = allCourses.filter((item) =>
+        item.title.toLowerCase().includes(text.toLowerCase())
     );
     setResults(filtered);
   };
 
-  const renderSearchResult = ({ item }: { item: typeof initialResults[0] }) => (
-    <TouchableOpacity style={styles.resultItem} onPress={() => console.log(`Selected: ${item.title}`)}>
-      <Image source={item.thumbnail} style={styles.resultImage} />
-      <View style={styles.resultText}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.details}>{item.category}</Text>
-        <Text style={styles.details}>{item.videos}</Text>
-      </View>
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>{item.progress}%</Text>
-      </View>
-    </TouchableOpacity>
+  const renderSearchResult = ({ item }: { item: Course }) => (
+      <TouchableOpacity
+          style={styles.resultItem}
+          onPress={() => router.push(`../modules/${item.id}`)} // Navigate to course page
+      >
+        <Image
+            source={{ uri: item.thumbnail }} // Assumes `thumbnail` is a URL; adjust if local asset
+            style={styles.resultImage}
+        />
+        <View style={styles.resultText}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.details}>{item.category}</Text>
+          <Text style={styles.details}>{item.videos}</Text>
+        </View>
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>{item.progress}%</Text>
+        </View>
+      </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      {/* Search Header */}
-      <View style={styles.searchContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Icon name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <View style={styles.searchBar}>
-          <TextInput
-            value={searchQuery}
-            onChangeText={handleSearch}
-            placeholder="Search"
-            style={styles.searchInput}
-          />
-          <TouchableOpacity style={styles.searchButton}>
-            <Icon name="search" size={20} color="#888" />
+      <View style={styles.container}>
+        {/* Search Header */}
+        <View style={styles.searchContainer}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Icon name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
+          <View style={styles.searchBar}>
+            <TextInput
+                value={searchQuery}
+                onChangeText={handleSearch}
+                placeholder="Search"
+                style={styles.searchInput}
+            />
+            <TouchableOpacity style={styles.searchButton}>
+              <Icon name="search" size={20} color="#888" />
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* Search Results */}
+        <Text style={styles.sectionTitle}>Search result</Text>
+
+        <FlatList
+            data={results}
+            renderItem={renderSearchResult}
+            keyExtractor={(item) => item.id}
+            style={styles.resultsList}
+            ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
+        />
       </View>
-
-      {/* Search Results */}
-      <Text style={styles.sectionTitle}>Search result</Text>
-
-      <FlatList
-        data={results}
-        renderItem={renderSearchResult}
-        keyExtractor={(item) => item.id}
-        style={styles.resultsList}
-        ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
-      />
-    </View>
   );
 }
 

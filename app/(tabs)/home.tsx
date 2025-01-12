@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,167 +7,182 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { useRouter, useGlobalSearchParams  } from 'expo-router';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CourseCard from '@/components/ui/CourseCard';
 import { useUser } from '@/contexts/UserContext';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase';
 
-const courses = [
-  {
-    id: '1',
-    image: require('@/assets/images/python-logo.png'),
-    category: 'Beginner',
-    title: 'Module 1 - Python Print',
-    duration: 50,
-    users: 24,
-  },
-  {
-    id: '2',
-    image: require('@/assets/images/python-logo.png'),
-    category: 'Intermediate',
-    title: 'Module 2 - Loops',
-    duration: 40,
-    users: 15,
-  },
-  {
-    id: '3',
-    image: require('@/assets/images/python-logo.png'),
-    category: 'Expert',
-    title: 'Module 3 - Advanced Functions',
-    duration: 60,
-    users: 10,
-  },
-];
+interface Course {
+  id: string;
+  image: string; // Assuming image is a URL stored in Firestore
+  category: string;
+  title: string;
+  duration: number;
+  users: number;
+}
 
 export default function HomePage() {
-  useGlobalSearchParams();
   const router = useRouter();
   const { user } = useUser();
   const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
   const [selectedCategory, setSelectedCategory] = useState<string>('Beginner');
-  const [filteredCourse, setFilteredCourse] = useState(
-    courses.find((course) => course.category === 'Beginner') || null
-  );
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [filteredCourse, setFilteredCourse] = useState<Course | null>(null);
 
+  // Fetch courses from Firestore
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'module')); // Replace 'modules' with your Firestore collection name
+        const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          image: doc.data().thumbnail || '', // Replace 'thumbnail' with your Firestore image field name
+          category: doc.data().category || 'Unknown',
+          title: doc.data().title || 'Untitled',
+          duration: doc.data().duration || 0, // Replace 'duration' with your Firestore duration field name
+          users: doc.data().users || 0, // Replace 'users' with your Firestore users field name
+        }));
+
+        setAllCourses(fetchedCourses);
+
+        // Initially filter by Beginner category
+        const mostPopularCourse = fetchedCourses
+            .filter((course) => course.category === 'Beginner')
+            .sort((a, b) => b.users - a.users)[0]; // Get the most popular course in 'Beginner'
+        setFilteredCourse(mostPopularCourse);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  // Handle category selection
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    const mostPopularCourse = courses
-      .filter((course) => course.category === category)
-      .sort((a, b) => b.users - a.users)[0]; // Select most popular
+    const mostPopularCourse = allCourses
+        .filter((course) => course.category === category)
+        .sort((a, b) => b.users - a.users)[0];
     setFilteredCourse(mostPopularCourse);
   };
 
-  const handleCoursePress = () => {
-    console.log('Course card pressed');
+  const handleCoursePress = (courseId: string) => {
+    router.push(`../modules/${courseId}`);
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollContainer}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          {/* Greeting Section */}
-          <View style={styles.greetingContainer}>
-            <Text style={styles.greetingText}>
-              Hello, <Text style={styles.userName}>{user?.displayName || 'Guest'}</Text>
-            </Text>
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollContainer}>
+          {/* Header Section */}
+          <View style={styles.header}>
+            {/* Greeting Section */}
+            <View style={styles.greetingContainer}>
+              <Text style={styles.greetingText}>
+                Hello, <Text style={styles.userName}>{user?.displayName || 'Guest'}</Text>
+              </Text>
+            </View>
+
+            {/* Profile Picture with Circle Effect */}
+            <View style={styles.profilePictureWrapper}>
+              <View style={[styles.circleOutline, styles.mediumCircle]} />
+              <View style={[styles.circleOutline, styles.largeCircle]} />
+              <TouchableOpacity
+                  onPress={() => router.push('/profile')}
+                  style={styles.profilePictureContainer}
+              >
+                <Image
+                    source={
+                      photoURL
+                          ? { uri: user?.photoURL }
+                          : require('@/assets/images/avatar-placeholder.jpg')
+                    }
+                    style={styles.profilePicture}
+                    onError={() => setPhotoURL(null)}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Profile Picture with Circle Effect */}
-          <View style={styles.profilePictureWrapper}>
-            <View style={[styles.circleOutline, styles.mediumCircle]} />
-            <View style={[styles.circleOutline, styles.largeCircle]} />
-            <TouchableOpacity 
-              onPress={() => router.push('/profile')}
-              style={styles.profilePictureContainer}
-            >
+          <View style={styles.heroContainer}>
+            {/* Background Illustration */}
+            <View style={styles.background}>
               <Image
-                source={
-                  photoURL
-                    ? { uri: user?.photoURL }
-                    : require('@/assets/images/avatar-placeholder.jpg')
-                }
-                style={styles.profilePicture}
-                onError={() => setPhotoURL(null)}
+                  source={require('@/assets/images/python-logo.png')}
+                  style={styles.illustration}
+                  resizeMode="contain"
               />
-            </TouchableOpacity>
+            </View>
+
+            {/* Text Content */}
+            <View style={styles.content}>
+              <Text style={styles.title}>Find a course you want to learn</Text>
+
+              {/* Search Input */}
+              <TouchableOpacity
+                  style={styles.searchContainer}
+                  onPress={() => router.push('/search')}
+              >
+                <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
+                <Text style={styles.searchPlaceholder}>Search Course</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.heroContainer}>
-          {/* Background Illustration */}
-          <View style={styles.background}>
-            <Image
-              source={require('@/assets/images/python-logo.png')}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
+          {/* Categories Section */}
+          <View style={styles.categoriesContainer}>
+            <Text style={styles.sectionTitle}>Level</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <TouchableOpacity
+                  style={[
+                    styles.categoryButton,
+                    selectedCategory === 'Beginner' ? styles.blueCategory : styles.grayCategory,
+                  ]}
+                  onPress={() => handleCategorySelect('Beginner')}
+              >
+                <Text style={styles.categoryText}>Beginner</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[
+                    styles.categoryButton,
+                    selectedCategory === 'Intermediate' ? styles.blueCategory : styles.grayCategory,
+                  ]}
+                  onPress={() => handleCategorySelect('Intermediate')}
+              >
+                <Text style={styles.categoryText}>Intermediate</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                  style={[
+                    styles.categoryButton,
+                    selectedCategory === 'Expert' ? styles.blueCategory : styles.grayCategory,
+                  ]}
+                  onPress={() => handleCategorySelect('Expert')}
+              >
+                <Text style={styles.categoryText}>Expert</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
 
-          {/* Text Content */}
-          <View style={styles.content}>
-            <Text style={styles.title}>Find a course you want to learn</Text>
-
-            {/* Search Input */}
-            <TouchableOpacity style={styles.searchContainer} onPress={() => router.push('/search')}>
-              <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
-              <Text style={styles.searchPlaceholder}>Search Course</Text>
-            </TouchableOpacity>
+          {/* Popular Courses Section */}
+          <View style={styles.popularCoursesContainer}>
+            <Text style={styles.sectionTitle}>Learn Our Most Popular Course</Text>
+            {filteredCourse ? (
+                <CourseCard
+                    image={{ uri: filteredCourse.image }}
+                    category={filteredCourse.category}
+                    title={filteredCourse.title}
+                    duration={filteredCourse.duration}
+                    users={filteredCourse.users}
+                    onPress={() => handleCoursePress(filteredCourse.id)}
+                />
+            ) : (
+                <Text style={styles.noCoursesText}>No courses available in this category.</Text>
+            )}
           </View>
-        </View>
-
-        {/* Categories Section */}
-        <View style={styles.categoriesContainer}>
-          <Text style={styles.sectionTitle}>Level</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                selectedCategory === 'Beginner' ? styles.blueCategory : styles.grayCategory,
-              ]}
-              onPress={() => handleCategorySelect('Beginner')}
-            >
-              <Text style={styles.categoryText}>Beginner</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                selectedCategory === 'Intermediate' ? styles.blueCategory : styles.grayCategory,
-              ]}
-              onPress={() => handleCategorySelect('Intermediate')}
-            >
-              <Text style={styles.categoryText}>Intermediate</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                selectedCategory === 'Expert' ? styles.blueCategory : styles.grayCategory,
-              ]}
-              onPress={() => handleCategorySelect('Expert')}
-            >
-              <Text style={styles.categoryText}>Expert</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-
-        {/* Popular Courses Section */}
-        <View style={styles.popularCoursesContainer}>
-          <Text style={styles.sectionTitle}>Learn Our Most Popular Course</Text>
-          {filteredCourse ? (
-            <CourseCard
-              image={filteredCourse.image}
-              category={filteredCourse.category}
-              title={filteredCourse.title}
-              duration={filteredCourse.duration}
-              users={filteredCourse.users}
-              onPress={handleCoursePress}
-            />
-          ) : (
-            <Text style={styles.noCoursesText}>No courses available in this category.</Text>
-          )}
-        </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
   );
 }
 
@@ -181,7 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 54,
   },
-  // heading
+  // Header Section
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -255,13 +270,13 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   illustration: {
-  width: '200%',
-  height: '200%',
-  position: 'absolute',
-  top: '-25%',
-  right: '-85%',
-  opacity: 0.25,
-},
+    width: '200%',
+    height: '200%',
+    position: 'absolute',
+    top: '-25%',
+    right: '-85%',
+    opacity: 0.25,
+  },
   content: {
     zIndex: 1,
   },
@@ -290,7 +305,7 @@ const styles = StyleSheet.create({
   searchPlaceholder: {
     flex: 1,
     fontSize: 16,
-    color: "#aaa",
+    color: '#aaa',
     paddingVertical: 6,
   },
   categoriesContainer: {

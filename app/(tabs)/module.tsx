@@ -18,7 +18,7 @@ type Course = {
   title: string;
   progress: number;
   category: string;
-  videos: number;
+  watchedVideos: number;
 };
 
 const ModuleOverview: React.FC = () => {
@@ -99,7 +99,7 @@ const ModuleOverview: React.FC = () => {
                     title={course.title}
                     progress={course.progress}
                     category={course.category}
-                    videos={course.videos}
+                    videos={course.watchedVideos}
                 />
             ))}
           </View>
