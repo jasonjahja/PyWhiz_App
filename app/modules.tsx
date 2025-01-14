@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from
 import { Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import VideoCard from './VideoCard';
+import VideoCard from '@/components/ui/VideoCard';
 
 export default function ModuleDetails() {
   const router = useRouter();
@@ -15,7 +15,8 @@ export default function ModuleDetails() {
         <View style={styles.videoContainer}>
           <Video
             style={styles.video}
-            source={{ uri: 'YOUR_VIDEO_URL' }}
+            // source={{ uri: require('@/assets/videos/GettingStarted.mp4') }}
+            source={{ uri: "ADD_VIDEO_URL" }}
             useNativeControls
             // resizeMode="contain"
           />
@@ -56,7 +57,7 @@ export default function ModuleDetails() {
       </ScrollView>
 
       {/* Fixed Quiz Button */}
-      <TouchableOpacity style={styles.quizButton}>
+      <TouchableOpacity style={styles.quizButton} onPress={() => router.push('/quiz')}>
         <Text style={styles.quizButtonText}>Take A Quiz!</Text>
       </TouchableOpacity>
     </View>
@@ -92,6 +93,7 @@ const styles = StyleSheet.create({
   },
   video: {
     flex: 1,
+    resizeMode: 'contain',
   },
   moduleInfo: {
     paddingVertical: 28,

@@ -30,7 +30,7 @@ export default function VideoCard({ title, description, duration, onPress }: Vid
           <Text style={styles.videoDurationText}>{duration}</Text>
         </View>
       </View>
-      <View style={styles.circle}>
+      <View style={styles.videoStatus}>
         <Icon
           name={isPlayed ? 'checkmark-outline' : 'play-outline'} // Toggle between play and checkmark
           size={16}
@@ -84,13 +84,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#666',
   },
-  circle: {
+  videoStatus: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#3178C6',
+    backgroundColor: '#ccc',
     marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingLeft: 2,
   },
 });
