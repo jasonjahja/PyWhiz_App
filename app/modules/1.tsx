@@ -1,60 +1,226 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import Quiz from './quiz';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from '../../firebase'; // Pastikan auth diimpor
 
-const Module1: React.FC = () => {
-    const [quizComplete, setQuizComplete] = useState(false);
+const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
+    const videos = [
+        {
+            id: 1,
+            title: 'What is Python?',
+            url: require('../../assets/videos/WhatIsPython.mp4'),
+        },
+        {
+            id: 2,
+            title: 'Why Learn Python?',
+            url: require('../../assets/videos/WhyLearnPython.mp4'),
+        },
+        {
+            id: 3,
+            title: 'Getting Started with Python',
+            url: require('../../assets/videos/GettingStarted.mp4'),
+        },
+        {
+            id: 4,
+            title: 'Python Setup',
+            url: require('../../assets/videos/PythonSetup.mp4'),
+        },
+    ];
+
+    const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
+    const [userId, setUserId] = useState<string | null>(null);
+    const moduleId = '1'; // ID modul saat ini
+
+    // Ambil userId dari pengguna login
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUserId(user.uid);
+                console.log(`Logged in as: ${user.uid}`);
+            } else {
+                console.log('No user logged in.');
+                setUserId(null);
+            }
+        });
+
+        return unsubscribe;
+    }, []);
+
+    // Fungsi untuk memperbarui watchedVideos di Firestore
+    const updateWatchedVideosInDB = async (videoId: number, action: 'add' | 'remove') => {
+        if (!userId) return;
+
+        const userProgressRef = doc(db, 'user_module_progress', `${userId}_${moduleId}`);
+        const userProgressSnap = await getDoc(userProgressRef);
+
+        if (userProgressSnap.exists()) {
+            const data = userProgressSnap.data();
+            let updatedWatchedVideos = data.watchedVideos || [];
+
+            if (action === 'add') {
+                if (!updatedWatchedVideos.includes(videoId)) {
+                    updatedWatchedVideos.push(videoId);
+                }
+            } else if (action === 'remove') {
+                updatedWatchedVideos = updatedWatchedVideos.filter((id: number) => id !== videoId);
+            }
+
+            await updateDoc(userProgressRef, {
+                watchedVideos: updatedWatchedVideos,
+            });
+            console.log(
+                `Video ${videoId} ${
+                    action === 'add' ? 'marked as watched' : 'removed from watched'
+                } for user "${userId}".`
+            );
+        } else if (action === 'add') {
+            await setDoc(userProgressRef, {
+                userId,
+                moduleId,
+                watchedVideos: [videoId],
+            });
+            console.log(`Initialized watchedVideos for user "${userId}" with video ${videoId}.`);
+        }
+    };
+
+    const toggleWatched = (videoId: number) => {
+        setWatchedVideos((prev) => {
+            const isCurrentlyWatched = prev.includes(videoId);
+
+            updateWatchedVideosInDB(videoId, isCurrentlyWatched ? 'remove' : 'add').catch(
+                console.error
+            );
+
+            return isCurrentlyWatched
+                ? prev.filter((id) => id !== videoId)
+                : [...prev, videoId];
+        });
+    };
+
+    const isWatched = (videoId: number) => watchedVideos.includes(videoId);
 
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.moduleContainer}>
-                <Text style={styles.title}>What is Python?</Text>
-                <Text style={styles.content}>
-                    Python is a widely-used programming language known for its simplicity and readability,
-                    making it an excellent choice for beginners and experts alike.
-                </Text>
-                <Text style={styles.subtitle}>First Python Program: Hello World!</Text>
-                <Text style={styles.code}>print("Hello, World!")</Text>
-            </View>
+            <Text style={styles.title}>Introduction to Python</Text>
+            <Text style={styles.subtitle}>
+                Videos Watched: {watchedVideos.length}/{videos.length}
+            </Text>
 
-            <Quiz
-                question="What will this code output?\nprint('Hello, World!')"
-                options={['Hello World', 'Hello, World!', 'Error', 'Nothing']}
-                correctAnswerIndex={1}
-                onQuizComplete={() => setQuizComplete(true)}
-            />
+            {videos.map((video) => {
+                const player = useVideoPlayer(video.url, (player) => {
+                    player.loop = false;
+                });
 
-            {quizComplete && (
-                <TouchableOpacity style={styles.nextButton} onPress={() => console.log('Go to Module 2')}>
-                    <Text style={styles.buttonText}>Next Module</Text>
-                </TouchableOpacity>
-            )}
+                const handlePlay = () => {
+                    if (!isWatched(video.id)) {
+                        toggleWatched(video.id);
+                    }
+                    player.play();
+                };
+
+                return (
+                    <View key={video.id} style={styles.videoContainer}>
+                        <Text style={styles.videoTitle}>{video.title}</Text>
+                        <VideoView
+                            style={styles.videoPlayer}
+                            player={player}
+                            allowsFullscreen
+                            allowsPictureInPicture
+                        />
+                        <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
+                            <Text style={styles.buttonText}>Play</Text>
+                        </TouchableOpacity>
+                        <View style={styles.markAsWatchedContainer}>
+                            <Text style={styles.markAsWatchedText}>Mark as Watched</Text>
+                            <Switch
+                                value={isWatched(video.id)}
+                                onValueChange={() => toggleWatched(video.id)}
+                            />
+                        </View>
+                    </View>
+                );
+            })}
+
+            <TouchableOpacity
+                style={styles.nextButton}
+                onPress={() => window.location.href="1-quiz"}
+            >
+                <Text style={styles.buttonText}>Go to Quiz</Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-    moduleContainer: { marginBottom: 16 },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-    content: { fontSize: 16, marginBottom: 16 },
-    subtitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
-    code: {
-        fontFamily: 'monospace',
-        backgroundColor: '#f5f5f5',
+    container: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#fff',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    subtitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    videoContainer: {
+        marginBottom: 24,
+        borderRadius: 8,
+        padding: 16,
+        backgroundColor: '#f9f9f9',
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    videoTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    videoPlayer: {
+        width: '100%',
+        height: 200,
+        backgroundColor: '#000',
+        borderRadius: 8,
+    },
+    playButton: {
+        backgroundColor: '#4caf50',
         padding: 8,
         borderRadius: 8,
-        fontSize: 16,
-        marginBottom: 16,
+        marginTop: 8,
+        alignItems: 'center',
     },
     nextButton: {
-        backgroundColor: '#28a745',
-        padding: 12,
+        backgroundColor: '#4caf50',
+        padding: 16,
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 16,
     },
-    buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    markAsWatchedContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 12,
+    },
+    markAsWatchedText: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
 });
 
 export default Module1;

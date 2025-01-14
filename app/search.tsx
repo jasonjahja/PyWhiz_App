@@ -15,7 +15,7 @@ import { db } from '@/firebase';
 
 interface Course {
   id: string;
-  thumbnail: string; // Path to image in storage or local asset
+  thumbnail: string;
   title: string;
   progress: number;
   category: string;
@@ -35,14 +35,14 @@ export default function SearchScreen() {
         const querySnapshot = await getDocs(collection(db, 'module'));
         const coursesData: Course[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          thumbnail: doc.data().thumbnail || '', // Adjust field if needed
+          thumbnail: doc.data().thumbnail || '',
           title: doc.data().title || '',
           progress: doc.data().progress || 0,
           category: doc.data().category || '',
           videos: `${doc.data().watchedVideos || 0}/${doc.data().totalVideos || 0} Video`,
         }));
         setAllCourses(coursesData);
-        setResults(coursesData); // Initially display all courses
+        setResults(coursesData);
       } catch (error) {
         console.error('Error fetching courses:', error);
       }

@@ -16,7 +16,7 @@ import { db } from '@/firebase';
 
 interface Course {
   id: string;
-  image: string; // Assuming image is a URL stored in Firestore
+  image: string;
   category: string;
   title: string;
   duration: number;
