@@ -58,7 +58,7 @@ export default function HomePage() {
   };
 
   const handleCoursePress = () => {
-    console.log('Course card pressed');
+    router.push('/modules');
   };
 
   return (
