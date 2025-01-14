@@ -11,7 +11,8 @@ import {
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/firebase';
+import { db, auth } from '@/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface Course {
   id: string;
@@ -27,31 +28,84 @@ export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch all courses from Firestore on mount
+  // Monitor Authentication
   useEffect(() => {
-    const fetchCourses = async () => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Fetch all courses and watchedVideos from Firestore on mount
+  useEffect(() => {
+    const fetchCoursesAndProgress = async () => {
+      if (!userId) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const querySnapshot = await getDocs(collection(db, 'module'));
-        const coursesData: Course[] = querySnapshot.docs.map((doc) => ({
+        setIsLoading(true);
+
+        // Fetch courses
+        const coursesSnapshot = await getDocs(collection(db, 'module'));
+        const coursesData = coursesSnapshot.docs.map((doc) => ({
           id: doc.id,
           thumbnail: doc.data().thumbnail || '',
-          title: doc.data().title || '',
-          progress: doc.data().progress || 0,
-          category: doc.data().category || '',
-          videos: `${doc.data().watchedVideos || 0}/${doc.data().totalVideos || 0} Video`,
+          title: doc.data().title || 'Untitled',
+          category: doc.data().category || 'Uncategorized',
+          totalVideos: doc.data().totalVideos || 0,
         }));
-        setAllCourses(coursesData);
-        setResults(coursesData);
+
+        // Fetch user's watchedVideos progress
+        const userProgressSnapshot = await getDocs(collection(db, 'user_module_progress'));
+        const userProgressMap: Record<string, number[]> = {};
+        userProgressSnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          if (data.userId === userId) {
+            userProgressMap[data.moduleId] = data.watchedVideos || [];
+          }
+        });
+
+        // Combine course and progress data
+        const combinedCourses = coursesData.map((course) => {
+          const watchedVideos = userProgressMap[course.id]?.length || 0;
+          const progress =
+              course.totalVideos > 0
+                  ? Math.round((watchedVideos / course.totalVideos) * 100)
+                  : 0;
+
+          return {
+            id: course.id,
+            thumbnail: course.thumbnail,
+            title: course.title,
+            category: course.category,
+            videos: `${watchedVideos}/${course.totalVideos} Videos`,
+            progress,
+          };
+        });
+
+        setAllCourses(combinedCourses);
+        setResults(combinedCourses);
       } catch (error) {
-        console.error('Error fetching courses:', error);
+        console.error('Error fetching courses or progress:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchCourses();
-  }, []);
+    fetchCoursesAndProgress();
+  }, [userId]);
 
-  // Filter results based on search query
+  // Debounced search to optimize performance
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     const filtered = allCourses.filter((item) =>
@@ -66,7 +120,11 @@ export default function SearchScreen() {
           onPress={() => router.push(`../modules/${item.id}`)} // Navigate to course page
       >
         <Image
-            source={{ uri: item.thumbnail }} // Assumes `thumbnail` is a URL; adjust if local asset
+            source={
+              item.thumbnail
+                  ? { uri: item.thumbnail }
+                  : require('@/assets/images/python-logo.png') // Default thumbnail
+            }
             style={styles.resultImage}
         />
         <View style={styles.resultText}>
@@ -91,7 +149,7 @@ export default function SearchScreen() {
             <TextInput
                 value={searchQuery}
                 onChangeText={handleSearch}
-                placeholder="Search"
+                placeholder="Search for courses"
                 style={styles.searchInput}
             />
             <TouchableOpacity style={styles.searchButton}>
@@ -101,15 +159,25 @@ export default function SearchScreen() {
         </View>
 
         {/* Search Results */}
-        <Text style={styles.sectionTitle}>Search result</Text>
+        <Text style={styles.sectionTitle}>
+          {searchQuery ? 'Search Results' : 'All Courses'}
+        </Text>
 
-        <FlatList
-            data={results}
-            renderItem={renderSearchResult}
-            keyExtractor={(item) => item.id}
-            style={styles.resultsList}
-            ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
-        />
+        {isLoading ? (
+            <Text style={styles.loadingText}>Loading courses...</Text>
+        ) : (
+            <FlatList
+                data={results}
+                renderItem={renderSearchResult}
+                keyExtractor={(item) => item.id}
+                style={styles.resultsList}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>
+                    {searchQuery ? 'No results found' : 'No courses available'}
+                  </Text>
+                }
+            />
+        )}
       </View>
   );
 }
@@ -141,7 +209,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     fontSize: 16,
-    includeFontPadding: false,
   },
   searchButton: {
     padding: 8,
@@ -193,6 +260,12 @@ const styles = StyleSheet.create({
     color: '#3178C6',
   },
   emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#888',
+    marginTop: 20,
+  },
+  loadingText: {
     textAlign: 'center',
     fontSize: 16,
     color: '#888',

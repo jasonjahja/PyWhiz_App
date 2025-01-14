@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 're
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { db, auth } from '../../firebase'; // Pastikan auth diimpor
+import { db, auth } from '../../firebase'; // Ensure auth is imported
 
 const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
     const videos = [
@@ -31,9 +31,9 @@ const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
-    const moduleId = '1'; // ID modul saat ini
+    const moduleId = '1'; // Current module ID
 
-    // Ambil userId dari pengguna login
+    // Fetch user ID when the user logs in
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -48,7 +48,31 @@ const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
         return unsubscribe;
     }, []);
 
-    // Fungsi untuk memperbarui watchedVideos di Firestore
+    // Fetch watchedVideos data from Firestore on page load
+    useEffect(() => {
+        const fetchWatchedVideos = async () => {
+            if (!userId) return;
+
+            try {
+                const userProgressRef = doc(db, 'user_module_progress', `${userId}_${moduleId}`);
+                const userProgressSnap = await getDoc(userProgressRef);
+
+                if (userProgressSnap.exists()) {
+                    const data = userProgressSnap.data();
+                    setWatchedVideos(data.watchedVideos || []);
+                    console.log(`Fetched watched videos: ${data.watchedVideos}`);
+                } else {
+                    console.log('No progress found for this module.');
+                }
+            } catch (error) {
+                console.error('Error fetching watched videos:', error);
+            }
+        };
+
+        fetchWatchedVideos();
+    }, [userId]);
+
+    // Update watchedVideos data in Firestore
     const updateWatchedVideosInDB = async (videoId: number, action: 'add' | 'remove') => {
         if (!userId) return;
 
@@ -145,7 +169,7 @@ const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             <TouchableOpacity
                 style={styles.nextButton}
-                onPress={() => window.location.href="1-quiz"}
+                onPress={() => window.location.href = "1-quiz"} // Navigate to the quiz
             >
                 <Text style={styles.buttonText}>Go to Quiz</Text>
             </TouchableOpacity>

@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'expo-router';
@@ -18,6 +18,7 @@ type Course = {
   title: string;
   progress: number;
   category: string;
+  totalVideos: number;
   watchedVideos: number;
 };
 
@@ -25,36 +26,73 @@ const ModuleOverview: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Beginner');
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
 
-  // Fetch Courses from Firestore
+  // Fetch user ID from auth
   useEffect(() => {
-    const fetchCourses = async () => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  // Fetch courses and user progress from Firestore
+  useEffect(() => {
+    const fetchCoursesWithProgress = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'module'));
-        const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Course, 'id'>),
-        }));
+        const fetchedCourses: Course[] = [];
+
+        for (const docSnap of querySnapshot.docs) {
+          const courseData = docSnap.data() as Omit<Course, 'id' | 'watchedVideos' | 'progress'>;
+
+          let watchedVideos = 0;
+
+          // Fetch user-specific progress for the module
+          if (userId) {
+            const userProgressRef = doc(db, 'user_module_progress', `${userId}_${docSnap.id}`);
+            const userProgressSnap = await getDoc(userProgressRef);
+
+            if (userProgressSnap.exists()) {
+              const userProgressData = userProgressSnap.data();
+              watchedVideos = (userProgressData.watchedVideos || []).length;
+            }
+          }
+
+          fetchedCourses.push({
+            id: docSnap.id,
+            ...courseData,
+            watchedVideos,
+            progress: Math.round((watchedVideos / courseData.totalVideos) * 100),
+          });
+        }
+
         setCourses(fetchedCourses);
         setFilteredCourses(
             fetchedCourses.filter((course) => course.category === selectedCategory)
         );
       } catch (error) {
-        console.error('Error fetching courses:', error);
+        console.error('Error fetching courses or progress:', error);
       }
     };
 
-    fetchCourses();
-  }, []);
+    if (userId) {
+      fetchCoursesWithProgress();
+    }
+  }, [userId, selectedCategory]);
 
-  // Filter Courses by Category
+  // Filter courses by category
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setFilteredCourses(courses.filter((course) => course.category === category));
   };
 
-  // Navigate to Specific Module
+  // Navigate to specific module
   const handleCoursePress = (courseId: string) => {
     router.push(`../modules/${courseId}`);
   };
