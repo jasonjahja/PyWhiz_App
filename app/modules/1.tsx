@@ -4,8 +4,11 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from '../../firebase'; // Ensure auth is imported
+import { useRouter } from 'expo-router';
 
-const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
+const Module1: React.FC = () => {
+    const router = useRouter(); // Initialize router
+
     const videos = [
         {
             id: 1,
@@ -169,7 +172,7 @@ const Module1: React.FC<{ navigation: any }> = ({ navigation }) => {
 
             <TouchableOpacity
                 style={styles.nextButton}
-                onPress={() => window.location.href = "1-quiz"} // Navigate to the quiz
+                onPress={() => router.push('/modules/1-quiz')}
             >
                 <Text style={styles.buttonText}>Go to Quiz</Text>
             </TouchableOpacity>

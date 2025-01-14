@@ -1,14 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
-const Module1Finished: React.FC<{ navigation: any }> = ({ navigation }) => {
+const Module1Finished: React.FC = () => {
+    const router = useRouter(); // Initialize the router
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Congratulations!</Text>
             <Text style={styles.content}>You have completed Module 1.</Text>
             <TouchableOpacity
                 style={styles.nextButton}
-                onPress={() => window.location.href="2"}
+                onPress={() => router.push('/modules/2')} // Navigate to the next module
             >
                 <Text style={styles.buttonText}>Go to Next Module</Text>
             </TouchableOpacity>
