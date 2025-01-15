@@ -104,14 +104,34 @@ const submitMultipleQuizQuestions = async () => {
       correctAnswerIndex: 0,
     },
     "2": {
-      question: "What is the keyword to define a function in Python?",
-      options: ["def", "function", "fn", "define"],
-      correctAnswerIndex: 0,
+      question: "What does this code output?\n\tif 3 < 5:\n\t\tprint('Yes')",
+      options: ["Error", "Yes", "No", "Nothing"],
+      correctAnswerIndex: 1,
     },
     "3": {
-      question: "Which data type is immutable in Python?",
-      options: ["List", "Set", "Tuple", "Dictionary"],
+      question: "What does this code output?\n\tfor i in range(2):\n\t\tprint(i)",
+      options: ["0\n1", "1\n2", "0\n1\n2", "Error"],
+      correctAnswerIndex: 0,
+    },
+    "4": {
+      question: "What does this code output?\n\tdef greet():\n\t\tprint('Hello')\n\tgreet()",
+      options: ["Nothing", "Error", "Hello", "Hello World"],
       correctAnswerIndex: 2,
+    },
+    "5": {
+      question: "What does this code output?\n\tfor i in range(2):\n\t\tfor j in range(2):\n\t\t\tprint(i, j)",
+      options: ['0 0\n0 1\n1 0\n1 1', '0 0\n1 1\n2 2', 'Error'],
+      correctAnswerIndex: 0,
+    },
+    "6": {
+      question: "What is the correct way to access the value of 'name' in this dictionary?\n\tmy_dict = {'name': 'Alice', 'age': 25}",
+      options: ['my_dict.name', 'my_dict["name"]', 'my_dict->name'],
+      correctAnswerIndex: 1,
+    },
+    "7": {
+      question: "What is the purpose of the bubble sort algorithm?",
+      options: ['To search for an element', 'To merge two lists', 'To sort a list'],
+      correctAnswerIndex: 1,
     },
   };
 
