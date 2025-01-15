@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Video } from 'expo-av';
+// import { ResizeMode, Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import VideoCard from '@/components/ui/VideoCard';
+import Video from 'react-native-video';
 
 export default function ModuleDetails() {
   const router = useRouter();
@@ -14,11 +15,11 @@ export default function ModuleDetails() {
         {/* Video Player Section */}
         <View style={styles.videoContainer}>
           <Video
+            source={{ uri: 'ADD_VIDEO_URL' }}
             style={styles.video}
-            // source={{ uri: require('@/assets/videos/GettingStarted.mp4') }}
-            source={{ uri: "ADD_VIDEO_URL" }}
-            useNativeControls
-            // resizeMode="contain"
+            controls
+            resizeMode="cover"
+            onError={(e: any) => console.log('Error:', e)}
           />
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Icon name="chevron-back" size={24} color="#000" />
@@ -90,10 +91,10 @@ const styles = StyleSheet.create({
     aspectRatio: 11/10,
     backgroundColor: '#f0f0f0',
     position: 'relative',
+    overflow: 'hidden',
   },
   video: {
     flex: 1,
-    resizeMode: 'contain',
   },
   moduleInfo: {
     paddingVertical: 28,
@@ -111,9 +112,9 @@ const styles = StyleSheet.create({
     textAlign: 'justify',
   },
   otherVideos: {
-    paddingVertical: 24,
+    paddingVertical: 12,
     paddingHorizontal: 2,
-    marginBottom: 92,
+    marginBottom: 98,
   },
   otherVideosHeader: {
     flexDirection: 'row',
@@ -130,9 +131,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   line: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#3178C6',
     width: '100%',
-    height: 4,
+    height: 3,
     borderRadius: 10,
     marginTop: 8,
     marginBottom: 14,
@@ -145,61 +146,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  videoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
-    borderColor: '#ccc',
-    borderWidth: 0.5,
-  },
-  thumbnail: {
-    width: 80,
-    height: 80,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-  },
-  videoInfo: {
-    flex: 1,
-    marginHorizontal: 14,
-    textAlign: 'justify',
-  },
-  videoTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 2,
-  },
-  videoDescription: {
-    fontSize: 12,
-    color: '#666',
-  },
-  videoFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  footerIcon: {
-    marginRight: 4,
-  },
-  videoDurationText: {
-    fontSize: 10,
-    color: '#666',
-  },  
-  circle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
-  },
   quizButton: {
     position: 'absolute',
     bottom: 10,
     left: 0,
     right: 0,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#3178C6',
     padding: 16,
     margin: 16,
     alignItems: 'center',
@@ -208,5 +160,6 @@ const styles = StyleSheet.create({
   quizButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#fff',
   },
 });

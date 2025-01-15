@@ -30,8 +30,7 @@ export default function QuizPage() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Icon name="arrow-back" size={20} color="#000" />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Icon name="chevron-back" size={20} color="#000" />
         </TouchableOpacity>
 
         {/* Progress Section */}
@@ -120,8 +119,9 @@ export default function QuizPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f4f9', // Softer background color for better contrast
     padding: 16,
+    paddingHorizontal: 18,
   },
   header: {
     marginBottom: 16,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#444', // Subtle text color
   },
   progressContainer: {
     marginBottom: 16,
@@ -149,39 +149,44 @@ const styles = StyleSheet.create({
   levelText: {
     fontWeight: 'bold',
     fontSize: 14,
+    color: '#333',
   },
   progressText: {
     fontSize: 12,
     color: '#666',
   },
   progressBar: {
-    height: 8,
+    height: 10, // Slightly taller progress bar
     backgroundColor: '#e0e0e0',
-    borderRadius: 4,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   progressIndicator: {
     height: '100%',
-    backgroundColor: '#3178C6',
+    backgroundColor: '#3178C6', // Vibrant progress bar color
+    borderRadius: 10,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
+    borderRadius: 12,
+    padding: 20,
     marginBottom: 192,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 2, // Android shadow
   },
   questionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 12,
+    color: '#333',
   },
   questionSubtitle: {
     fontSize: 14,
     color: '#666',
+    lineHeight: 20,
   },
   answers: {
     marginBottom: 48,
@@ -189,65 +194,88 @@ const styles = StyleSheet.create({
   answerButton: {
     padding: 16,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#ccc',
-    marginBottom: 8,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   answerText: {
     fontSize: 14,
+    color: '#333',
   },
   answerIndex: {
     fontWeight: 'bold',
     marginRight: 8,
+    color: '#3178C6', // Add some accent color
   },
   correctAnswer: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
+    backgroundColor: '#e8f5e9',
+    borderColor: '#66bb6a',
   },
   incorrectAnswer: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    backgroundColor: '#ffebee',
+    borderColor: '#ef5350',
   },
   resultCard: {
     position: 'absolute',
-    top: 380,
+    top: 360,
     left: 16,
     padding: 16,
-    borderRadius: 8,
-    width: '100%',
+    borderRadius: 12,
+    width: '92%',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 3, // Add shadow for Android
   },
   resultCorrect: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
+    backgroundColor: '#e8f5e9',
+    borderColor: '#66bb6a',
   },
   resultIncorrect: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
+    backgroundColor: '#ffebee',
+    borderColor: '#ef5350',
   },
   resultTextCorrect: {
-    color: '#155724',
+    color: '#2e7d32',
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
   },
   resultTextIncorrect: {
-    color: '#721c24',
+    color: '#c62828',
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
   },
   navigation: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 16,
   },
   navButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 12,
     backgroundColor: '#3178C6',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   navButtonText: {
     color: '#fff',
     fontSize: 14,
+    fontWeight: 'bold',
     marginHorizontal: 4,
   },
   navButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#ddd',
   },
 });
