@@ -16,6 +16,7 @@ export default function ModuleDetails() {
         <View style={styles.videoContainer}>
           <Video
             source={{ uri: 'ADD_VIDEO_URL' }}
+            // source={{ uri: require('@/assets/images/GettingStarted.mp4') }}
             style={styles.video}
             controls
             resizeMode="cover"

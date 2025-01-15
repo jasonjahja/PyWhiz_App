@@ -206,6 +206,7 @@ export default function ProfileScreen() {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={!passwordVisible}
+                            placeholderTextColor="#888"
                         />
                         <TouchableOpacity
                             onPress={() => setPasswordVisible(!passwordVisible)}
@@ -227,6 +228,7 @@ export default function ProfileScreen() {
                             value={oldPassword}
                             onChangeText={setOldPassword}
                             secureTextEntry={!oldPasswordVisible}
+                            placeholderTextColor="#888"
                         />
                         <TouchableOpacity
                             onPress={() => setOldPasswordVisible(!oldPasswordVisible)}
