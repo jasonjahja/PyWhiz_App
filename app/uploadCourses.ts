@@ -92,3 +92,42 @@ const upload = async (): Promise<void> => {
 upload()
   .then(() => console.log("All courses uploaded successfully!"))
   .catch((error) => console.error("Error uploading courses:", error));
+
+// upload quiz
+
+const submitMultipleQuizQuestions = async () => {
+  const quizzes = {
+    "1": {
+      question:
+        "What is the output of the following code? print('Hello, World!')",
+      options: ["Hello, World!", "Error", "Nothing", "Syntax Error"],
+      correctAnswerIndex: 0,
+    },
+    "2": {
+      question: "What is the keyword to define a function in Python?",
+      options: ["def", "function", "fn", "define"],
+      correctAnswerIndex: 0,
+    },
+    "3": {
+      question: "Which data type is immutable in Python?",
+      options: ["List", "Set", "Tuple", "Dictionary"],
+      correctAnswerIndex: 2,
+    },
+  };
+
+  try {
+    const quizCollection = collection(db, "quizzes");
+    const batch = Object.entries(quizzes).map(([id, quiz]) => {
+      const quizRef = doc(quizCollection, id); // Use the key as the document ID
+      return setDoc(quizRef, quiz);
+    });
+
+    await Promise.all(batch);
+    console.log("All quiz questions submitted successfully!");
+  } catch (error) {
+    console.error("Error submitting quiz questions:", error);
+  }
+};
+
+// Run the function
+submitMultipleQuizQuestions();

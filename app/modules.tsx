@@ -83,31 +83,27 @@ export default function ModuleDetails() {
     };
 
     fetchModuleData();
-    console.log(moduleData);
   }, [moduleId, userId]);
 
-  const toggleWatchedVideo = async (videoId: number) => {
+  const markVideoAsWatched = async (videoId: number) => {
+    if (watchedVideos.includes(videoId)) {
+      return; // If the video is already marked as watched, do nothing
+    }
+
     const progressRef = doc(
       db,
       "user_module_progress",
       `${userId}_${moduleId}`
     );
-    const isWatched = watchedVideos.includes(videoId);
 
-    const updatedWatchedVideos = isWatched
-      ? watchedVideos.filter((id) => id !== videoId) // Remove videoId if it's currently watched
-      : [...watchedVideos, videoId]; // Add videoId if it's not currently watched
+    const updatedWatchedVideos = [...watchedVideos, videoId]; // Add videoId to the watched list
 
     try {
       await updateDoc(progressRef, {
         watchedVideos: updatedWatchedVideos,
       });
       setWatchedVideos(updatedWatchedVideos);
-      console.log(
-        `Video ${videoId} ${
-          isWatched ? "unmarked as watched" : "marked as watched"
-        }.`
-      );
+      console.log(`Video ${videoId} marked as watched.`);
     } catch (error) {
       console.error("Error updating watched videos:", error);
     }
@@ -172,7 +168,7 @@ export default function ModuleDetails() {
 
           {/* Video List */}
           {moduleData.videos.map((video: any, index: number) => {
-            const videoSource = getVideoSource(video.fileName);
+            const videoSource = getVideoSource(video.url);
             return (
               <VideoCard
                 key={index}
@@ -182,7 +178,7 @@ export default function ModuleDetails() {
                 isWatched={watchedVideos.includes(video.id)}
                 onPress={() => {
                   setCurrentVideo(videoSource);
-                  toggleWatchedVideo(video.id); // Toggle watched status on click
+                  markVideoAsWatched(video.id); // Only mark video as watched
                 }}
               />
             );
@@ -193,7 +189,12 @@ export default function ModuleDetails() {
       {/* Fixed Quiz Button */}
       <TouchableOpacity
         style={styles.quizButton}
-        onPress={() => router.push(`/quiz`)}
+        onPress={() =>
+          router.push({
+            pathname: `/quiz`,
+            params: { moduleId: `${moduleId}` },
+          })
+        }
       >
         <Text style={styles.quizButtonText}>Take A Quiz!</Text>
       </TouchableOpacity>
@@ -227,11 +228,10 @@ const styles = StyleSheet.create({
     aspectRatio: 11 / 10,
     backgroundColor: "#f0f0f0",
     position: "relative",
+    overflow: "hidden",
   },
   video: {
-    width: "100%",
-    height: 200,
-    borderRadius: 12,
+    flex: 1,
   },
   moduleInfo: {
     paddingVertical: 28,
@@ -249,9 +249,9 @@ const styles = StyleSheet.create({
     textAlign: "justify",
   },
   otherVideos: {
-    paddingVertical: 24,
+    paddingVertical: 12,
     paddingHorizontal: 2,
-    marginBottom: 92,
+    marginBottom: 98,
   },
   otherVideosHeader: {
     flexDirection: "row",
@@ -268,19 +268,27 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   line: {
-    backgroundColor: "#ccc",
+    backgroundColor: "#3178C6",
     width: "100%",
-    height: 4,
+    height: 3,
     borderRadius: 10,
     marginTop: 8,
     marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1,
   },
   quizButton: {
     position: "absolute",
     bottom: 10,
     left: 0,
     right: 0,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#3178C6",
     padding: 16,
     margin: 16,
     alignItems: "center",
@@ -289,5 +297,6 @@ const styles = StyleSheet.create({
   quizButtonText: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#fff",
   },
 });
