@@ -83,6 +83,7 @@ export default function ModuleDetails() {
     };
 
     fetchModuleData();
+    console.log(moduleData);
   }, [moduleId, userId]);
 
   const toggleWatchedVideo = async (videoId: number) => {
@@ -176,8 +177,8 @@ export default function ModuleDetails() {
               <VideoCard
                 key={index}
                 title={video.title || "Untitled Video"}
-                description="Video description here."
-                duration="Duration Info"
+                description={video.description || "Video description here."}
+                duration={video.duration || "--:--"}
                 isWatched={watchedVideos.includes(video.id)}
                 onPress={() => {
                   setCurrentVideo(videoSource);
