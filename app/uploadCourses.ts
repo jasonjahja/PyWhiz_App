@@ -6,6 +6,7 @@ interface Course {
     title: string;
     totalVideos: number;
     category: string;
+    description: string;
 }
 
 const courses: Course[] = [
@@ -14,50 +15,51 @@ const courses: Course[] = [
         title: 'Module 1 - Python Print',
         totalVideos: 4,
         category: 'Beginner',
+        description: 'This module introduces Python and its features.',
     },
     {
         id: '2',
         title: 'Module 2 - Conditional',
         totalVideos: 6,
         category: 'Beginner',
+        description: 'This module introduces Python and its features.',
     },
     {
         id: '3',
         title: 'Module 3 - Loops',
         totalVideos: 4,
         category: 'Beginner',
+        description: 'This module introduces Python and its features.',
     },
     {
         id: '4',
         title: 'Module 4 - Functions',
         totalVideos: 4,
         category: 'Beginner',
+        description: 'This module introduces Python and its features.',
     },
     {
         id: '5',
         title: 'Module 5 - Advanced Loops',
         totalVideos: 6,
         category: 'Intermediate',
+        description: 'This module introduces Python and its features.',
     },
     {
         id: '6',
         title: 'Module 6 - Data Structures',
         totalVideos: 5,
         category: 'Intermediate',
+        description: 'This module introduces Python and its features.',
     },
     {
         id: '7',
         title: 'Module 7 - Algorithms',
         totalVideos: 1,
         category: 'Expert',
+        description: 'This module introduces Python and its features.',
     },
 ];
-
-// // Function to calculate progress
-// const calculateProgress = (watchedVideos: number, totalVideos: number): number => {
-//     if (totalVideos === 0) return 0;
-//     return Math.round((watchedVideos / totalVideos) * 100); // Return percentage progress
-// };
 
 // Function to upload courses to Firestore
 const upload = async (): Promise<void> => {

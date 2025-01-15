@@ -70,7 +70,7 @@ export default function HomePage() {
   };
 
   const handleCoursePress = (courseId: string) => {
-    router.push(`../modules/${courseId}`);
+    router.push(`../modules`);
   };
 
   return (
