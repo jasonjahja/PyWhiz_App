@@ -21,9 +21,7 @@ export default function ModuleDetails() {
             resizeMode="cover"
             onError={(e: any) => console.log('Error:', e)}
           />
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Icon name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
+          
         </View>
 
         {/* Module Info */}
@@ -57,6 +55,10 @@ export default function ModuleDetails() {
         </View>
       </ScrollView>
 
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Icon name="chevron-back" size={24} color="#000" />
+      </TouchableOpacity>
+
       {/* Fixed Quiz Button */}
       <TouchableOpacity style={styles.quizButton} onPress={() => router.push('/quiz')}>
         <Text style={styles.quizButtonText}>Take A Quiz!</Text>
@@ -77,14 +79,17 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 14,
-    left: 14,
+    top: 68,
+    left: 34,
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
+    // opacity: 0.5,
+    borderWidth: 1,
+    borderColor: '#ccc'
   },
   videoContainer: {
     borderRadius: 12,
@@ -114,12 +119,14 @@ const styles = StyleSheet.create({
   otherVideos: {
     paddingVertical: 12,
     paddingHorizontal: 2,
-    marginBottom: 98,
+    marginBottom: 124,
   },
   otherVideosHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    // marginBottom: 12,
+    marginHorizontal: 2,
   },
   sectionTitle: {
     fontSize: 18,
@@ -131,7 +138,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   line: {
-    backgroundColor: '#3178C6',
+    backgroundColor: '#ccc',
     width: '100%',
     height: 3,
     borderRadius: 10,
