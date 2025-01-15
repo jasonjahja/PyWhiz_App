@@ -20,7 +20,7 @@ const courses: Course[] = [
   {
     id: "2",
     title: "Module 2 - Conditional",
-    totalVideos: 6,
+    totalVideos: 2,
     category: "Beginner",
     description: "This module introduces Python and its features.",
   },
@@ -41,14 +41,14 @@ const courses: Course[] = [
   {
     id: "5",
     title: "Module 5 - Advanced Loops",
-    totalVideos: 6,
+    totalVideos: 1,
     category: "Intermediate",
     description: "This module introduces Python and its features.",
   },
   {
     id: "6",
     title: "Module 6 - Data Structures",
-    totalVideos: 5,
+    totalVideos: 3,
     category: "Intermediate",
     description: "This module introduces Python and its features.",
   },
