@@ -27,8 +27,8 @@ interface Course {
 }
 
 function convertTimeToNumber(time: string) {
-  const [hours, minutes] = time.split(":").map((time) => parseInt(time, 10));
-  return hours * 60 + minutes;
+  const [minutes, seconds] = time.split(":").map((time) => parseInt(time, 10));
+  return Math.floor(minutes + seconds / 60);
 }
 
 export default function HomePage() {
