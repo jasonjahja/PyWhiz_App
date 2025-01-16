@@ -305,8 +305,8 @@ const styles = StyleSheet.create({
     web: {
       flex: 1,
       backgroundColor: "#f5f5f5",
-      alignItems: "center", // Center the app horizontally
-      justifyContent: "center", // Center the app vertically
+      alignItems: "center",
+      justifyContent: "center",
     },
     default: {
       flex: 1,

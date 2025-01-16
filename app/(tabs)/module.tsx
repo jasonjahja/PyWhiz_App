@@ -12,8 +12,9 @@ import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "expo-router";
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from "react-native-vector-icons/Ionicons";
 import StretchedCourseCard from "@/components/ui/StretchedCourseCards";
+import imageMapping from "../imagemapping";
 
 type Course = {
   id: string;
@@ -24,6 +25,11 @@ type Course = {
   totalVideos: number;
   watchedVideos: number;
   description: string;
+  videos: any;
+};
+
+type LastOpenedModule = {
+  lastOpenedModule: string;
 };
 
 export default function ModuleOverview() {
@@ -31,7 +37,19 @@ export default function ModuleOverview() {
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [userId, setUserId] = useState<string | null>(null);
+  const [lastOpenedModule, setLastOpenedModule] = useState<any | null>(null);
+  const [lastOpenedModuleData, setLastOpenedModuleData] = useState<any | null>(
+    null
+  );
   const router = useRouter();
+
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
 
   // Fetch user ID from auth
   useEffect(() => {
@@ -73,6 +91,49 @@ export default function ModuleOverview() {
               const userProgressData = userProgressSnap.data();
               watchedVideos = (userProgressData.watchedVideos || []).length;
               console.log("Watched videos:", watchedVideos);
+            } else {
+              console.log(
+                `No progress found for user "${userId}" in module "${docSnap.id}".`
+              );
+            }
+
+            // last opened module data
+            const userLastOpenedModuleRef = doc(db, "user_progress", userId);
+            const userLastOpenedModuleSnap = await getDoc(
+              userLastOpenedModuleRef
+            );
+
+            const lastOpenedModule = userLastOpenedModuleSnap.data();
+
+            console.log(
+              "user last opened module",
+              userLastOpenedModuleSnap.data()
+            );
+
+            if (userLastOpenedModuleSnap.exists()) {
+              const data = userLastOpenedModuleSnap.data();
+              setLastOpenedModule(data);
+            }
+
+            console.log("Last opened module variable:", lastOpenedModule);
+
+            // get the data of the last opened module
+            console.log(
+              "last opened module",
+              lastOpenedModule?.lastOpenedModule
+            );
+            const lastOpenedModuleRef = doc(
+              db,
+              "module",
+              lastOpenedModule?.lastOpenedModule
+            );
+            const lastOpenedModuleSnap = await getDoc(lastOpenedModuleRef);
+
+            console.log("last opened module data", lastOpenedModuleSnap.data());
+
+            if (lastOpenedModuleSnap.exists()) {
+              setLastOpenedModuleData(lastOpenedModuleSnap.data());
+              console.log("Last opened module data:", lastOpenedModuleData);
             }
           }
 
@@ -135,15 +196,19 @@ export default function ModuleOverview() {
         {/* Header Section */}
         <View style={styles.header}>
           {/* Back Button */}
-          <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.iconButton}
+          >
             <Icon name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
-
           {/* Title */}
           <Text style={styles.title}>My Courses</Text>
-
           {/* Search Button */}
-          <TouchableOpacity onPress={() => router.push('/search')} style={styles.iconButton}>
+          <TouchableOpacity
+            onPress={() => router.push("/search")}
+            style={styles.iconButton}
+          >
             <Icon name="search-outline" size={24} color="#000" />
           </TouchableOpacity>
         </View>
@@ -170,7 +235,15 @@ export default function ModuleOverview() {
 
         {/* Hero Section */}
         <Text style={styles.aboveHeroTitle}>Latest Learned</Text>
-        <View style={styles.heroContainer}>
+        <TouchableOpacity
+          style={styles.heroContainer}
+          onPress={() =>
+            router.push({
+              pathname: `/modules`,
+              params: { moduleId: lastOpenedModule.lastOpenedModule },
+            })
+          }
+        >
           <View style={styles.background}>
             <Image
               source={require("@/assets/images/python-logo.png")} // Replace with your illustration path
@@ -180,10 +253,16 @@ export default function ModuleOverview() {
           </View>
 
           <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>Module 1 - Python print</Text>
-            <Text style={styles.heroSubtitle}>Part 1 - 24 Minutes</Text>
+            <Text style={styles.heroTitle}>
+              {lastOpenedModuleData
+                ? lastOpenedModuleData.title
+                : "Start learning now!"}
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              {lastOpenedModuleData ? lastOpenedModuleData.description : ""}
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Filtered Courses Section */}
         <View style={styles.coursesContainer}>
@@ -192,8 +271,8 @@ export default function ModuleOverview() {
               key={course.id}
               onPress={() => handleCoursePress(course.id)}
               thumbnail={
-                course.thumbnail
-                  ? { uri: course.thumbnail }
+                course.videos[0].url
+                  ? getImage(course.videos[0].url)
                   : require("@/assets/images/python-logo.png")
               }
               title={course.title}
@@ -214,8 +293,8 @@ const styles = StyleSheet.create({
     web: {
       flex: 1,
       backgroundColor: "#fff",
-      alignItems: "center", // Center the app horizontally
-      justifyContent: "center", // Center the app vertically
+      alignItems: "center",
+      justifyContent: "center",
     },
     default: {
       flex: 1,
@@ -321,5 +400,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 12,
+    width: "70%",
   },
 });

@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
-import { db } from "@/firebase"; 
+import { db } from "@/firebase";
+import { getAuth } from "firebase/auth";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Icon from "react-native-vector-icons/Ionicons";
 import VideoCard from "@/components/ui/VideoCard";
@@ -18,10 +19,10 @@ import imageMapping from "./imagemapping";
 
 export default function ModuleDetails() {
   const router = useRouter();
-  const { moduleId } = useGlobalSearchParams(); 
+  const { moduleId } = useGlobalSearchParams();
   const [moduleData, setModuleData] = useState<any>(null);
   const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
-  const [userId, setUserId] = useState<string>("8hzRnSqWVZXH1zEIvm2Ayrps9442"); 
+  const [userId, setUserId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
   const [currentVideoDetails, setCurrentVideoDetails] = useState<any>(null);
@@ -68,6 +69,8 @@ export default function ModuleDetails() {
           console.error(`Module with ID "${moduleId}" not found.`);
         }
 
+        setUserId(getAuth().currentUser?.uid || ""); // Replace with authenticated user ID
+
         // Fetch user's watched videos
         const progressRef = doc(
           db,
@@ -86,6 +89,28 @@ export default function ModuleDetails() {
             moduleId,
             watchedVideos: [],
           });
+        }
+
+        // update user last opened module
+        try {
+          const userProgressRef = doc(db, "user_progress", userId);
+          const userProgressSnap = await getDoc(userProgressRef);
+
+          console.log(userProgressSnap.data());
+
+          if (!userProgressSnap.exists()) {
+            await setDoc(doc(db, "user_progress", userId), {
+              lastOpenedModule: moduleId,
+            });
+            console.log("Created User progress", userId, moduleId);
+          } else {
+            await updateDoc(doc(db, "user_progress", userId), {
+              lastOpenedModule: moduleId,
+            });
+            console.log("Updated User progress", userId, moduleId);
+          }
+        } catch (e) {
+          console.log("Error updating user last opened module", e);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -224,8 +249,8 @@ const styles = StyleSheet.create({
     web: {
       flex: 1,
       backgroundColor: "#fff",
-      alignItems: "center", 
-      justifyContent: "center", 
+      alignItems: "center",
+      justifyContent: "center",
     },
     default: {
       flex: 1,
@@ -307,8 +332,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   line: {
-    backgroundColor: '#ccc',
-    width: '100%',
+    backgroundColor: "#ccc",
+    width: "100%",
     height: 3,
     borderRadius: 10,
     marginTop: 8,

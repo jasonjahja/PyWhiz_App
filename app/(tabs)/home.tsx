@@ -27,8 +27,8 @@ interface Course {
 }
 
 function convertTimeToNumber(time: string) {
-  const [hours, minutes] = time.split(":").map((time) => parseInt(time, 10));
-  return hours * 60 + minutes;
+  const [minutes, seconds] = time.split(":").map((time) => parseInt(time, 10));
+  return Math.floor(minutes + seconds / 60);
 }
 
 export default function HomePage() {
@@ -69,11 +69,6 @@ export default function HomePage() {
 
         const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => {
           const videos = doc.data().videos || []; // Get the videos array, default to an empty array if not present
-          console.log(
-            "imagemapping",
-            imageMapping[videos[0].url],
-            videos[0].url
-          );
           const totalDuration = videos.reduce((acc: number, video: any) => {
             return acc + (convertTimeToMinutes(video.duration) || 0); // Add up the duration of each video
           }, 0); // Initial accumulator value is 0
@@ -254,8 +249,8 @@ const styles = StyleSheet.create({
     web: {
       flex: 1,
       backgroundColor: "#fff",
-      alignItems: "center", // Center the app horizontally
-      justifyContent: "center", // Center the app vertically
+      alignItems: "center",
+      justifyContent: "center",
     },
     default: { flex: 1, backgroundColor: "#fff" },
   }),

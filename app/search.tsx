@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import imageMapping from "./imagemapping";
 
 interface Course {
   id: string;
@@ -21,7 +22,7 @@ interface Course {
   title: string;
   progress: number;
   category: string;
-  videos: string;
+  videos: any;
 }
 
 export default function SearchScreen() {
@@ -31,6 +32,14 @@ export default function SearchScreen() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
 
   const getCategoryStyle = (category: string) => {
     switch (category) {
@@ -44,7 +53,7 @@ export default function SearchScreen() {
         return { textColor: "#333" };
     }
   };
-  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -76,7 +85,10 @@ export default function SearchScreen() {
           title: doc.data().title || "Untitled",
           category: doc.data().category || "Uncategorized",
           totalVideos: doc.data().totalVideos || 0,
+          videos: doc.data().videos || [],
         }));
+
+        console.log(coursesData[0].videos);
 
         // Fetch user's watchedVideos progress
         const userProgressSnapshot = await getDocs(
@@ -100,7 +112,7 @@ export default function SearchScreen() {
 
           return {
             id: course.id,
-            thumbnail: course.thumbnail,
+            thumbnail: course.videos[0].url,
             title: course.title,
             category: course.category,
             videos: `${watchedVideos}/${course.totalVideos} Videos`,
@@ -131,38 +143,30 @@ export default function SearchScreen() {
 
   const renderSearchResult = ({ item }: { item: Course }) => {
     const { textColor } = getCategoryStyle(item.category);
-
     return (
       <TouchableOpacity
-      style={styles.resultItem}
-      onPress={() =>
-        router.push({
-          pathname: `/modules`,
-          params: { moduleId: `${item.id}` },
-        })
-      } // Navigate to course page
-    >
-      <Image
-        source={
-          item.thumbnail
-            ? { uri: item.thumbnail }
-            : require("@/assets/images/python-logo.png") // Default thumbnail
-        }
-        style={styles.resultImage}
-      />
-      <View style={styles.resultText}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text
-            style={[styles.details, { color: textColor }]}
-          >{item.category}</Text>
-        <Text style={styles.details}>{item.videos}</Text>
-      </View>
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>{item.progress}%</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
+        style={styles.resultItem}
+        onPress={() =>
+          router.push({
+            pathname: `/modules`,
+            params: { moduleId: `${item.id}` },
+          })
+        } // Navigate to course page
+      >
+        <Image source={getImage(item.thumbnail)} style={styles.resultImage} />
+        <View style={styles.resultText}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.details}>{item.category}</Text>
+          <Text style={[styles.details, { color: textColor }]}>
+            {item.videos}
+          </Text>
+        </View>
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>{item.progress}%</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>

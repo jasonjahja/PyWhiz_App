@@ -13,6 +13,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"; /
 import { auth } from "../firebase";
 import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
+import { initializeUserProgress } from "./uploadProgress";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -54,6 +55,8 @@ export default function RegisterScreen() {
       } else {
         throw new Error("No user is currently signed in.");
       }
+
+      initializeUserProgress(auth.currentUser.uid); // Initialize user progress
 
       console.log("User registered:", userCredential.user);
       Alert.alert("Success", "Account created successfully!");
