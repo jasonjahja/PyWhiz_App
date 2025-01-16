@@ -61,7 +61,7 @@ export default function CompletionPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 24,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
@@ -81,11 +81,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 8,
   },
   content: {
     fontSize: 18,
-    marginBottom: 32,
+    marginBottom: 72,
     textAlign: "center",
   },
   buttonsContainer: {
@@ -95,14 +95,14 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     backgroundColor: "#3178C6",
-    padding: 16,
+    padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginHorizontal: 8,
   },
   homeButton: {
     backgroundColor: "#333",
-    padding: 16,
+    padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginHorizontal: 8,

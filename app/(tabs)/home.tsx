@@ -12,7 +12,7 @@ import { useRouter, useGlobalSearchParams } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
 import CourseCard from "@/components/ui/CourseCard";
 import { useUser } from "@/contexts/UserContext";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import imageMapping from "../imagemapping";
 
@@ -39,6 +39,24 @@ export default function HomePage() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [filteredCourse, setFilteredCourse] = useState<Course | null>(null);
 
+  const fetchUserProfile = async () => {
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setPhotoURL(userData.photoURL || null);
+        } else {
+          console.log("No user profile found in Firestore.");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
   const getImage = (fileName: string) => {
     if (imageMapping[fileName]) {
       return imageMapping[fileName];
@@ -63,6 +81,7 @@ export default function HomePage() {
 
   // Fetch courses from Firestore
   useEffect(() => {
+    fetchUserProfile();
     const fetchCourses = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "module")); // Replace 'modules' with your Firestore collection name
@@ -141,7 +160,7 @@ export default function HomePage() {
               <Image
                 source={
                   photoURL
-                    ? { uri: user?.photoURL }
+                    ? { uri: `data:image/jpeg;base64,${photoURL}` }
                     : require("@/assets/images/avatar-placeholder.jpg")
                 }
                 style={styles.profilePicture}

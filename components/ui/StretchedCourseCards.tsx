@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 8,
-    marginLeft: 8,
+    marginLeft: 2,
     marginRight: 16,
   },
   courseContent: {

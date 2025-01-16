@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Platform,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
 import {
   updateProfile,
   reauthenticateWithCredential,
@@ -22,6 +22,7 @@ import {
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useUser } from "@/contexts/UserContext";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -37,14 +38,14 @@ export default function ProfileScreen() {
 
   const handleEditPhoto = async () => {
     const user = auth.currentUser;
-
+  
     if (!user) {
       Alert.alert("Error", "No user is currently signed in.");
       return;
     }
-
+  
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+  
     if (status !== "granted") {
       Alert.alert(
         "Permission Denied",
@@ -52,22 +53,34 @@ export default function ProfileScreen() {
       );
       return;
     }
-
+  
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
-      quality: 1,
+      quality: 0.1, // Reduce quality to limit file size
+      base64: true, // Include Base64 string in the result
     });
-
-    if (!result.canceled) {
-      const selectedImageUri = result.assets[0].uri;
-      setTempPhotoURL(selectedImageUri); // Temporarily store the selected image URI
-      Alert.alert(
-        "Info",
-        'Profile picture will be saved when you click "Save Changes".'
-      );
+  
+    if (!result.canceled && result.assets[0].base64) {
+      try {
+        const base64Image = result.assets[0].base64;
+        const userRef = doc(db, "users", user.uid);
+  
+        // Save the Base64 string to Firestore
+        await setDoc(
+          userRef,
+          { photoBase64: base64Image },
+          { merge: true }
+        );
+  
+        setTempPhotoURL(`data:image/jpeg;base64,${base64Image}`);
+      } catch (error) {
+        console.error("Error saving profile picture:", error);
+        Alert.alert("Error", "Failed to save profile picture.");
+      }
     }
   };
+  
 
   const handleSaveChanges = async () => {
     const user = auth.currentUser;
@@ -82,61 +95,81 @@ export default function ProfileScreen() {
       return;
     }
 
-    // If the user is trying to change the password
-    if (password) {
-      if (!oldPassword) {
-        Alert.alert(
-          "Error",
-          "You must enter your old password to set a new password."
-        );
-        return;
+    const userRef = doc(db, "users", user.uid);
+
+    // Collect updates
+    const updates: any = {
+      displayName: name,
+      email: user.email,
+    };
+
+    // if (tempPhotoURL && tempPhotoURL !== photoURL) {
+    //   updates.photoURL = tempPhotoURL;
+    // }
+
+    try {
+      // Update display name
+      if (user.displayName !== name) {
+        await updateProfile(user, { displayName: name });
+        await setDoc(userRef, { displayName: name }, { merge: true });
+        setUser(auth.currentUser); // Update local context/state
       }
 
-      try {
+      // Update profile picture
+      if (tempPhotoURL && tempPhotoURL !== photoURL) {
+        try {
+          const base64PhotoURL = tempPhotoURL.replace(/^data:image\/\w+;base64,/, "");
+          await setDoc(
+            userRef,
+            { photoURL: base64PhotoURL }, // Save only the Base64 string
+            { merge: true }
+          );
+      
+          setPhotoURL(base64PhotoURL); // Update local state
+          setTempPhotoURL(null); // Clear temporary state
+          Alert.alert("Success", "Profile picture updated successfully!");
+        } catch (error) {
+          console.error("Error saving profile picture:", error);
+          Alert.alert("Error", "Failed to save profile picture.");
+        }
+      }
+      
+
+      // If the user is trying to change the password
+      if (password) {
+        if (!oldPassword) {
+          Alert.alert(
+            "Error",
+            "You must enter your old password to set a new password."
+          );
+          return;
+        }
+
         // Re-authenticate the user with their old password
-        const credential = EmailAuthProvider.credential(
-          user.email!,
-          oldPassword
-        );
+        const credential = EmailAuthProvider.credential(user.email!, oldPassword);
         await reauthenticateWithCredential(user, credential);
 
         // Update the password
         await updatePassword(user, password);
-
         Alert.alert("Success", "Password updated successfully!");
-      } catch (error: any) {
-        Alert.alert("Error", error.message || "Failed to update password.");
-        return;
       }
-    }
 
-    // Update the display name
-    if (user.displayName !== name) {
-      try {
-        await updateProfile(user, { displayName: name });
-        setUser(auth.currentUser);
-        Alert.alert("Success", "Profile updated successfully!");
-      } catch (error: any) {
-        Alert.alert("Error", error.message || "Failed to update profile.");
-      }
-    }
+      // Update Firebase Auth profile
+      await updateProfile(user, updates);
 
-    // Save the new photo URL if there is a temporary photo URL
-    if (tempPhotoURL && tempPhotoURL !== photoURL) {
-      try {
-        await updateProfile(user, { photoURL: tempPhotoURL });
-        setPhotoURL(tempPhotoURL); // Update local state after saving
-        setTempPhotoURL(null); // Clear temporary state
-        Alert.alert("Success", "Profile updated successfully!");
-      } catch (error: any) {
-        Alert.alert(
-          "Error",
-          error.message || "Failed to update profile picture."
-        );
-        return;
-      }
+      // Update Firestore with new user data
+      await setDoc(userRef, updates, { merge: true });
+
+      // Sync local state
+      setUser(auth.currentUser);
+      if (updates.photoURL) setPhotoURL(updates.photoURL);
+      setTempPhotoURL(null);
+
+      Alert.alert("Success", "Profile updated successfully!");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update profile.");
     }
-  };
+};
 
   const isSaveDisabled =
     user?.displayName === name &&
@@ -162,6 +195,31 @@ export default function ProfileScreen() {
       },
     ]);
   };
+
+  // Fetch user data from Firestore on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user?.uid) return;
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setName(userData.displayName || "");
+          setPhotoURL(userData.photoURL || "");
+          // Any other fields you want to load can be added here
+        } else {
+          console.log("No user data found in Firestore.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   return (
     <View style={styles.container}>
@@ -196,11 +254,11 @@ export default function ProfileScreen() {
                 tempPhotoURL
                   ? { uri: tempPhotoURL }
                   : photoURL
-                  ? { uri: photoURL }
+                  ? { uri: `data:image/jpeg;base64,${photoURL}` }
                   : require("@/assets/images/avatar-placeholder.jpg")
               }
               style={styles.profilePicture}
-              onError={() => setTempPhotoURL(null)} // Optional error handling
+              onError={() => setTempPhotoURL(null)}
             />
             <TouchableOpacity
               style={styles.editPhotoButton}
