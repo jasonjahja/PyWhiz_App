@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,12 @@ import {
   FlatList,
   Image,
   StyleSheet,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { collection, getDocs } from 'firebase/firestore';
-import { db, auth } from '@/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+} from "react-native";
+import { useRouter } from "expo-router";
+import Icon from "react-native-vector-icons/Ionicons";
+import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "@/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface Course {
   id: string;
@@ -25,7 +25,7 @@ interface Course {
 
 export default function SearchScreen() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,17 +56,19 @@ export default function SearchScreen() {
         setIsLoading(true);
 
         // Fetch courses
-        const coursesSnapshot = await getDocs(collection(db, 'module'));
+        const coursesSnapshot = await getDocs(collection(db, "module"));
         const coursesData = coursesSnapshot.docs.map((doc) => ({
           id: doc.id,
-          thumbnail: doc.data().thumbnail || '',
-          title: doc.data().title || 'Untitled',
-          category: doc.data().category || 'Uncategorized',
+          thumbnail: doc.data().thumbnail || "",
+          title: doc.data().title || "Untitled",
+          category: doc.data().category || "Uncategorized",
           totalVideos: doc.data().totalVideos || 0,
         }));
 
         // Fetch user's watchedVideos progress
-        const userProgressSnapshot = await getDocs(collection(db, 'user_module_progress'));
+        const userProgressSnapshot = await getDocs(
+          collection(db, "user_module_progress")
+        );
         const userProgressMap: Record<string, number[]> = {};
         userProgressSnapshot.docs.forEach((doc) => {
           const data = doc.data();
@@ -79,9 +81,9 @@ export default function SearchScreen() {
         const combinedCourses = coursesData.map((course) => {
           const watchedVideos = userProgressMap[course.id]?.length || 0;
           const progress =
-              course.totalVideos > 0
-                  ? Math.round((watchedVideos / course.totalVideos) * 100)
-                  : 0;
+            course.totalVideos > 0
+              ? Math.round((watchedVideos / course.totalVideos) * 100)
+              : 0;
 
           return {
             id: course.id,
@@ -96,7 +98,7 @@ export default function SearchScreen() {
         setAllCourses(combinedCourses);
         setResults(combinedCourses);
       } catch (error) {
-        console.error('Error fetching courses or progress:', error);
+        console.error("Error fetching courses or progress:", error);
       } finally {
         setIsLoading(false);
       }
@@ -109,88 +111,96 @@ export default function SearchScreen() {
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     const filtered = allCourses.filter((item) =>
-        item.title.toLowerCase().includes(text.toLowerCase())
+      item.title.toLowerCase().includes(text.toLowerCase())
     );
     setResults(filtered);
   };
 
   const renderSearchResult = ({ item }: { item: Course }) => (
-      <TouchableOpacity
-          style={styles.resultItem}
-          onPress={() => router.push(`../modules/${item.id}`)} // Navigate to course page
-      >
-        <Image
-            source={
-              item.thumbnail
-                  ? { uri: item.thumbnail }
-                  : require('@/assets/images/python-logo.png') // Default thumbnail
-            }
-            style={styles.resultImage}
-        />
-        <View style={styles.resultText}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.details}>{item.category}</Text>
-          <Text style={styles.details}>{item.videos}</Text>
-        </View>
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>{item.progress}%</Text>
-        </View>
-      </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.resultItem}
+      onPress={() =>
+        router.push({
+          pathname: `/modules`,
+          params: { moduleId: `${item.id}` },
+        })
+      } // Navigate to course page
+    >
+      <Image
+        source={
+          item.thumbnail
+            ? { uri: item.thumbnail }
+            : require("@/assets/images/python-logo.png") // Default thumbnail
+        }
+        style={styles.resultImage}
+      />
+      <View style={styles.resultText}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.details}>{item.category}</Text>
+        <Text style={styles.details}>{item.videos}</Text>
+      </View>
+      <View style={styles.progressContainer}>
+        <Text style={styles.progressText}>{item.progress}%</Text>
+      </View>
+    </TouchableOpacity>
   );
 
   return (
-      <View style={styles.container}>
-        {/* Search Header */}
-        <View style={styles.searchContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Icon name="chevron-back" size={24} color="#000" />
+    <View style={styles.container}>
+      {/* Search Header */}
+      <View style={styles.searchContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Icon name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <View style={styles.searchBar}>
+          <TextInput
+            value={searchQuery}
+            onChangeText={handleSearch}
+            placeholder="Search for courses"
+            style={styles.searchInput}
+          />
+          <TouchableOpacity style={styles.searchButton}>
+            <Icon name="search" size={20} color="#888" />
           </TouchableOpacity>
-          <View style={styles.searchBar}>
-            <TextInput
-                value={searchQuery}
-                onChangeText={handleSearch}
-                placeholder="Search for courses"
-                style={styles.searchInput}
-            />
-            <TouchableOpacity style={styles.searchButton}>
-              <Icon name="search" size={20} color="#888" />
-            </TouchableOpacity>
-          </View>
         </View>
-
-        {/* Search Results */}
-        <Text style={styles.sectionTitle}>
-          {searchQuery ? 'Search Results' : 'All Courses'}
-        </Text>
-
-        {isLoading ? (
-            <Text style={styles.loadingText}>Loading courses...</Text>
-        ) : (
-            <FlatList
-                data={results}
-                renderItem={renderSearchResult}
-                keyExtractor={(item) => item.id}
-                style={styles.resultsList}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>
-                    {searchQuery ? 'No results found' : 'No courses available'}
-                  </Text>
-                }
-            />
-        )}
       </View>
+
+      {/* Search Results */}
+      <Text style={styles.sectionTitle}>
+        {searchQuery ? "Search Results" : "All Courses"}
+      </Text>
+
+      {isLoading ? (
+        <Text style={styles.loadingText}>Loading courses...</Text>
+      ) : (
+        <FlatList
+          data={results}
+          renderItem={renderSearchResult}
+          keyExtractor={(item) => item.id}
+          style={styles.resultsList}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              {searchQuery ? "No results found" : "No courses available"}
+            </Text>
+          }
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingTop: 54,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
@@ -199,9 +209,9 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
     borderRadius: 100,
     paddingHorizontal: 16,
   },
@@ -215,7 +225,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 16,
     marginTop: 16,
     marginBottom: 8,
@@ -225,11 +235,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   resultItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: "#F0F0F0",
   },
   resultImage: {
     width: 60,
@@ -242,33 +252,33 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
+    fontWeight: "500",
+    color: "#000",
   },
   details: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 2,
   },
   progressContainer: {
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    justifyContent: "center",
+    alignItems: "flex-end",
   },
   progressText: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#3178C6',
+    fontWeight: "bold",
+    color: "#3178C6",
   },
   emptyText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 16,
-    color: '#888',
+    color: "#888",
     marginTop: 20,
   },
   loadingText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 16,
-    color: '#888',
+    color: "#888",
     marginTop: 20,
   },
 });

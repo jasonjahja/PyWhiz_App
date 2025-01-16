@@ -1,26 +1,74 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { useRouter, useGlobalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase";
 
 export default function QuizPage() {
   const router = useRouter();
-  const [currentProgress, setCurrentProgress] = useState(60);
+  const { moduleId } = useGlobalSearchParams(); // Get the moduleId from the route params
+  const [quizData, setQuizData] = useState<any[]>([]); // Store quiz data
+  const [currentIndex, setCurrentIndex] = useState(0); // Track the current question index
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      if (!moduleId) {
+        console.error("Module ID is missing.");
+        return;
+      }
+
+      try {
+        const quizRef = doc(db, "quizzes", moduleId as string);
+        const quizSnap = await getDoc(quizRef);
+
+        if (quizSnap.exists()) {
+          const data = quizSnap.data();
+          setQuizData([data]);
+        } else {
+          console.error(`No quizzes found for module ID "${moduleId}".`);
+        }
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+      }
+    };
+
+    fetchQuizData();
+  }, [moduleId]);
+
   const handleAnswerSelect = (index: number) => {
     setSelectedAnswer(index);
-    // Demo: setting 2nd answer as correct
-    setIsCorrect(index === 1);
+    const correctIndex = quizData[currentIndex].correctAnswerIndex;
+    setIsCorrect(index === correctIndex);
   };
 
-  const answers = [
-    "The process of converting high-level language to machine code",
-    "A program that executes Python code",
-    "A text editor for writing code",
-    "A debugging tool",
-  ];
+  const handleCompletion = () => {
+    // Handle quiz completion logic
+    router.push({
+      pathname: `/completion`,
+      params: { moduleId: `${moduleId}` },
+    });
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+    }
+  };
+
+  if (quizData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading quizzes...</Text>
+      </View>
+    );
+  }
+
+  const currentQuestion = quizData[currentIndex];
 
   return (
     <View style={styles.container}>
@@ -38,13 +86,15 @@ export default function QuizPage() {
         <View style={styles.progressContainer}>
           <View style={styles.progressHeader}>
             <Text style={styles.levelText}>Level 1</Text>
-            <Text style={styles.progressText}>Question 3 of 5</Text>
+            <Text style={styles.progressText}>
+              Question {currentIndex + 1} of {quizData.length}
+            </Text>
           </View>
           <View style={styles.progressBar}>
             <View
               style={[
                 styles.progressIndicator,
-                { width: `${currentProgress}%` },
+                { width: `${((currentIndex + 1) / quizData.length) * 100}%` },
               ]}
             />
           </View>
@@ -53,7 +103,7 @@ export default function QuizPage() {
 
       {/* Question Section */}
       <View style={styles.card}>
-        <Text style={styles.questionTitle}>What is a Python interpreter?</Text>
+        <Text style={styles.questionTitle}>{currentQuestion.question}</Text>
         <Text style={styles.questionSubtitle}>
           Choose the most accurate definition from the options below.
         </Text>
@@ -61,7 +111,7 @@ export default function QuizPage() {
 
       {/* Answer Section */}
       <View style={styles.answers}>
-        {answers.map((answer, index) => (
+        {currentQuestion.options.map((answer: string, index: number) => (
           <TouchableOpacity
             key={index}
             style={[
@@ -100,7 +150,9 @@ export default function QuizPage() {
           >
             {isCorrect
               ? "Correct! Well done!"
-              : "Incorrect. The correct answer is: A program that executes Python code"}
+              : `Incorrect. The correct answer is: ${
+                  currentQuestion.options[currentQuestion.correctAnswerIndex]
+                }`}
           </Text>
         </View>
       )}
@@ -110,9 +162,10 @@ export default function QuizPage() {
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentProgress <= 20 && styles.navButtonDisabled,
+            currentIndex === 0 && styles.navButtonDisabled,
           ]}
-          disabled={currentProgress <= 20}
+          disabled={currentIndex === 0}
+          onPress={handlePreviousQuestion}
         >
           <Icon name="chevron-back" size={16} color="#fff" />
           <Text style={styles.navButtonText}>Previous</Text>
@@ -123,8 +176,11 @@ export default function QuizPage() {
             selectedAnswer === null && styles.navButtonDisabled,
           ]}
           disabled={selectedAnswer === null}
+          onPress={handleCompletion}
         >
-          <Text style={styles.navButtonText}>Next</Text>
+          <Text style={styles.navButtonText}>
+            {currentIndex === quizData.length - 1 ? "Finish" : "Next"}
+          </Text>
           <Icon name="chevron-forward" size={16} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -183,7 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 16,
-    marginBottom: 192,
+    marginBottom: 12,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
@@ -226,7 +282,7 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     position: "absolute",
-    top: 380,
+    bottom: 80,
     left: 16,
     padding: 16,
     borderRadius: 8,
@@ -247,6 +303,7 @@ const styles = StyleSheet.create({
     color: "#721c24",
   },
   navigation: {
+    paddingTop: 120,
     flexDirection: "row",
     justifyContent: "space-between",
   },

@@ -35,7 +35,13 @@ export default function VideoCard({
           <Text style={styles.videoDurationText}>{duration}</Text>
         </View>
       </View>
-      <View style={[styles.videoStatus, isWatched && styles.watched]}>
+      <View
+        style={[
+          styles.videoStatus,
+          { backgroundColor: isWatched ? "#3178C6" : "#333" },
+          { paddingLeft: isWatched ? 0 : 2 },
+        ]}
+      >
         <Icon
           name={isWatched ? "checkmark-outline" : "play-outline"} // Toggle between play and checkmark
           size={16}
@@ -93,13 +99,8 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#ccc",
     marginRight: 8,
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 2,
-  },
-  watched: {
-    backgroundColor: "#4caf50", // Green for watched videos
   },
 });
