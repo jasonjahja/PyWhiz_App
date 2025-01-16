@@ -14,14 +14,14 @@ export default function ModuleDetails() {
       <ScrollView style={styles.scrollView}>
         {/* Video Player Section */}
         <View style={styles.videoContainer}>
-          <Video
+          {/* <Video
             source={{ uri: 'ADD_VIDEO_URL' }}
             // source={{ uri: require('@/assets/images/GettingStarted.mp4') }}
             style={styles.video}
             controls
-            resizeMode="cover"
+            resizeMode="contain"
             onError={(e: any) => console.log('Error:', e)}
-          />
+          /> */}
           
         </View>
 
