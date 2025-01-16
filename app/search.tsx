@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import imageMapping from "./imagemapping";
 
 interface Course {
   id: string;
@@ -21,7 +22,7 @@ interface Course {
   title: string;
   progress: number;
   category: string;
-  videos: string;
+  videos: any;
 }
 
 export default function SearchScreen() {
@@ -31,6 +32,14 @@ export default function SearchScreen() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
 
   // Monitor Authentication
   useEffect(() => {
@@ -64,7 +73,10 @@ export default function SearchScreen() {
           title: doc.data().title || "Untitled",
           category: doc.data().category || "Uncategorized",
           totalVideos: doc.data().totalVideos || 0,
+          videos: doc.data().videos || [],
         }));
+
+        console.log(coursesData[0].videos);
 
         // Fetch user's watchedVideos progress
         const userProgressSnapshot = await getDocs(
@@ -88,7 +100,7 @@ export default function SearchScreen() {
 
           return {
             id: course.id,
-            thumbnail: course.thumbnail,
+            thumbnail: course.videos[0].url,
             title: course.title,
             category: course.category,
             videos: `${watchedVideos}/${course.totalVideos} Videos`,
@@ -127,14 +139,7 @@ export default function SearchScreen() {
         })
       } // Navigate to course page
     >
-      <Image
-        source={
-          item.thumbnail
-            ? { uri: item.thumbnail }
-            : require("@/assets/images/python-logo.png") // Default thumbnail
-        }
-        style={styles.resultImage}
-      />
+      <Image source={getImage(item.thumbnail)} style={styles.resultImage} />
       <View style={styles.resultText}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.details}>{item.category}</Text>
