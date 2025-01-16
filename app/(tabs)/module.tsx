@@ -13,6 +13,7 @@ import { db, auth } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "expo-router";
 import StretchedCourseCard from "@/components/ui/StretchedCourseCards";
+import imageMapping from "../imagemapping";
 
 type Course = {
   id: string;
@@ -23,6 +24,7 @@ type Course = {
   totalVideos: number;
   watchedVideos: number;
   description: string;
+  videos: any;
 };
 
 export default function ModuleOverview() {
@@ -31,6 +33,14 @@ export default function ModuleOverview() {
   const [selectedCategory, setSelectedCategory] = useState<string>("Beginner");
   const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
+
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
 
   // Fetch user ID from auth
   useEffect(() => {
@@ -180,8 +190,8 @@ export default function ModuleOverview() {
               key={course.id}
               onPress={() => handleCoursePress(course.id)}
               thumbnail={
-                course.thumbnail
-                  ? { uri: course.thumbnail }
+                course.videos[0].url
+                  ? getImage(course.videos[0].url)
                   : require("@/assets/images/python-logo.png")
               }
               title={course.title}
