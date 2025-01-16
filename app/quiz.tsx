@@ -1,6 +1,12 @@
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase";
@@ -72,128 +78,147 @@ export default function QuizPage() {
 
   return (
     <View style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Icon name="arrow-back" size={20} color="#000" />
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-
-        {/* Progress Section */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.levelText}>Level 1</Text>
-            <Text style={styles.progressText}>
-              Question {currentIndex + 1} of {quizData.length}
-            </Text>
-          </View>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressIndicator,
-                { width: `${((currentIndex + 1) / quizData.length) * 100}%` },
-              ]}
-            />
-          </View>
-        </View>
-      </View>
-
-      {/* Question Section */}
-      <View style={styles.card}>
-        <Text style={styles.questionTitle}>{currentQuestion.question}</Text>
-        <Text style={styles.questionSubtitle}>
-          Choose the most accurate definition from the options below.
-        </Text>
-      </View>
-
-      {/* Answer Section */}
-      <View style={styles.answers}>
-        {currentQuestion.options.map((answer: string, index: number) => (
+      <View style={styles.widthcontainer}>
+        {/* Header Section */}
+        <View style={styles.header}>
           <TouchableOpacity
-            key={index}
-            style={[
-              styles.answerButton,
-              selectedAnswer === index && isCorrect !== null
-                ? isCorrect
-                  ? styles.correctAnswer
-                  : styles.incorrectAnswer
-                : null,
-            ]}
-            onPress={() => handleAnswerSelect(index)}
-            disabled={isCorrect !== null}
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-            <Text style={styles.answerText}>
-              <Text style={styles.answerIndex}>
-                {String.fromCharCode(65 + index)}.
-              </Text>{" "}
-              {answer}
-            </Text>
+            <Icon name="arrow-back" size={20} color="#000" />
+            <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
-        ))}
-      </View>
 
-      {/* Result Section */}
-      {isCorrect !== null && (
-        <View
-          style={[
-            styles.resultCard,
-            isCorrect ? styles.resultCorrect : styles.resultIncorrect,
-          ]}
-        >
-          <Text
-            style={
-              isCorrect ? styles.resultTextCorrect : styles.resultTextIncorrect
-            }
-          >
-            {isCorrect
-              ? "Correct! Well done!"
-              : `Incorrect. The correct answer is: ${
-                  currentQuestion.options[currentQuestion.correctAnswerIndex]
-                }`}
+          {/* Progress Section */}
+          <View style={styles.progressContainer}>
+            <View style={styles.progressHeader}>
+              <Text style={styles.levelText}>Level 1</Text>
+              <Text style={styles.progressText}>
+                Question {currentIndex + 1} of {quizData.length}
+              </Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View
+                style={[
+                  styles.progressIndicator,
+                  { width: `${((currentIndex + 1) / quizData.length) * 100}%` },
+                ]}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Question Section */}
+        <View style={styles.card}>
+          <Text style={styles.questionTitle}>{currentQuestion.question}</Text>
+          <Text style={styles.questionSubtitle}>
+            Choose the most accurate definition from the options below.
           </Text>
         </View>
-      )}
 
-      {/* Navigation Buttons */}
-      <View style={styles.navigation}>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            currentIndex === 0 && styles.navButtonDisabled,
-          ]}
-          disabled={currentIndex === 0}
-          onPress={handlePreviousQuestion}
-        >
-          <Icon name="chevron-back" size={16} color="#fff" />
-          <Text style={styles.navButtonText}>Previous</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            selectedAnswer === null && styles.navButtonDisabled,
-          ]}
-          disabled={selectedAnswer === null}
-          onPress={handleCompletion}
-        >
-          <Text style={styles.navButtonText}>
-            {currentIndex === quizData.length - 1 ? "Finish" : "Next"}
-          </Text>
-          <Icon name="chevron-forward" size={16} color="#fff" />
-        </TouchableOpacity>
+        {/* Answer Section */}
+        <View style={styles.answers}>
+          {currentQuestion.options.map((answer: string, index: number) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.answerButton,
+                selectedAnswer === index && isCorrect !== null
+                  ? isCorrect
+                    ? styles.correctAnswer
+                    : styles.incorrectAnswer
+                  : null,
+              ]}
+              onPress={() => handleAnswerSelect(index)}
+              disabled={isCorrect !== null}
+            >
+              <Text style={styles.answerText}>
+                <Text style={styles.answerIndex}>
+                  {String.fromCharCode(65 + index)}.
+                </Text>{" "}
+                {answer}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Result Section */}
+        {isCorrect !== null && (
+          <View
+            style={[
+              styles.resultCard,
+              isCorrect ? styles.resultCorrect : styles.resultIncorrect,
+            ]}
+          >
+            <Text
+              style={
+                isCorrect
+                  ? styles.resultTextCorrect
+                  : styles.resultTextIncorrect
+              }
+            >
+              {isCorrect
+                ? "Correct! Well done!"
+                : `Incorrect. The correct answer is: ${
+                    currentQuestion.options[currentQuestion.correctAnswerIndex]
+                  }`}
+            </Text>
+          </View>
+        )}
+
+        {/* Navigation Buttons */}
+        <View style={styles.navigation}>
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              currentIndex === 0 && styles.navButtonDisabled,
+            ]}
+            disabled={currentIndex === 0}
+            onPress={handlePreviousQuestion}
+          >
+            <Icon name="chevron-back" size={16} color="#fff" />
+            <Text style={styles.navButtonText}>Previous</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              selectedAnswer === null && styles.navButtonDisabled,
+            ]}
+            disabled={selectedAnswer === null}
+            onPress={handleCompletion}
+          >
+            <Text style={styles.navButtonText}>
+              {currentIndex === quizData.length - 1 ? "Finish" : "Next"}
+            </Text>
+            <Icon name="chevron-forward" size={16} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#f9f9f9",
+      padding: 16,
+      alignItems: "center", // Center the app horizontally
+      justifyContent: "center", // Center the app vertically
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#f9f9f9",
+      padding: 16,
+    },
+  }),
+  widthcontainer: Platform.select({
+    web: {
+      width: 375,
+    },
+    default: { width: "100%" },
+  }),
   header: {
     marginBottom: 16,
     marginTop: 34,
@@ -283,7 +308,6 @@ const styles = StyleSheet.create({
   resultCard: {
     position: "absolute",
     bottom: 80,
-    left: 16,
     padding: 16,
     borderRadius: 8,
     width: "100%",

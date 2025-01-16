@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
@@ -203,15 +204,31 @@ export default function ModuleDetails() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 18,
-    marginTop: 48,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center", // Center the app horizontally
+      justifyContent: "center", // Center the app vertically
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#fff",
+    },
+  }),
+  scrollView: Platform.select({
+    web: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 48,
+      width: 375,
+    },
+    default: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 48,
+    },
+  }),
   backButton: {
     position: "absolute",
     top: 14,
@@ -283,17 +300,31 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  quizButton: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
-    backgroundColor: "#3178C6",
-    padding: 16,
-    margin: 16,
-    alignItems: "center",
-    borderRadius: 12,
-  },
+  quizButton: Platform.select({
+    web: {
+      // position: "absolute",
+      bottom: 10,
+      left: 0,
+      right: 0,
+      backgroundColor: "#3178C6",
+      padding: 16,
+      margin: 16,
+      alignItems: "center",
+      borderRadius: 12,
+      width: 375,
+    },
+    default: {
+      position: "absolute",
+      bottom: 10,
+      left: 0,
+      right: 0,
+      backgroundColor: "#3178C6",
+      padding: 16,
+      margin: 16,
+      alignItems: "center",
+      borderRadius: 12,
+    },
+  }),
   quizButtonText: {
     fontSize: 18,
     fontWeight: "bold",

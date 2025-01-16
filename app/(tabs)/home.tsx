@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -206,15 +207,28 @@ export default function HomePage() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scrollContainer: {
-    flex: 1,
-    paddingHorizontal: 16,
-    marginTop: 54,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center", // Center the app horizontally
+      justifyContent: "center", // Center the app vertically
+    },
+    default: { flex: 1, backgroundColor: "#fff" },
+  }),
+  scrollContainer: Platform.select({
+    web: {
+      flex: 1,
+      paddingHorizontal: 16,
+      marginTop: 54,
+      width: 375,
+    },
+    default: {
+      flex: 1,
+      paddingHorizontal: 16,
+      marginTop: 54,
+    },
+  }),
   // Header Section
   header: {
     flexDirection: "row",

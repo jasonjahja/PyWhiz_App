@@ -7,6 +7,7 @@ import {
   FlatList,
   Image,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -193,11 +194,32 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 54,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#fff",
+      paddingTop: 54,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#fff",
+      paddingTop: 54,
+    },
+  }),
+  widthcontainer: Platform.select({
+    web: {
+      width: 375,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    default: {
+      width: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  }),
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",

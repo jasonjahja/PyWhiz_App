@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { auth } from '@/firebase'; // Adjust path to your firebase configuration
-import { useRouter } from 'expo-router';
-import { ThemedText } from '../ThemedText';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { auth } from "@/firebase"; // Adjust path to your firebase configuration
+import { useRouter } from "expo-router";
+import { ThemedText } from "../ThemedText";
 
 export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,13 +29,13 @@ export default function Navbar() {
       <TouchableOpacity
         onPress={() => {
           if (isAuthenticated) {
-            router.push('/home'); // Redirect to home if authenticated
+            router.push("/home"); // Redirect to home if authenticated
           }
         }}
         disabled={!isAuthenticated} // Disable press if not authenticated
       >
         <Image
-          source={require('@/assets/images/python-logo.png')}
+          source={require("@/assets/images/python-logo.png")}
           style={styles.navLogo}
         />
       </TouchableOpacity>
@@ -43,14 +43,14 @@ export default function Navbar() {
       {/* Profile Picture or Login Button */}
       {isAuthenticated ? (
         <TouchableOpacity
-          onPress={() => router.push('/profile')}
+          onPress={() => router.push("/profile")}
           style={styles.profileContainer}
         >
           <Image
             source={
               photoURL
                 ? { uri: photoURL } // Use the user's profile picture
-                : require('@/assets/images/avatar-placeholder.jpg') // Fallback to default avatar
+                : require("@/assets/images/avatar-placeholder.jpg") // Fallback to default avatar
             }
             style={styles.profilePicture}
           />
@@ -58,7 +58,7 @@ export default function Navbar() {
       ) : (
         // Login Button for Unauthenticated User
         <TouchableOpacity
-          onPress={() => router.push('/login')}
+          onPress={() => router.push("/login")}
           style={styles.signInButton}
         >
           <ThemedText style={styles.signInText}>Login</ThemedText>
@@ -70,18 +70,18 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   navbar: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 32,
     paddingTop: 48,
     paddingVertical: 16,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    backgroundColor: "#fff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -91,30 +91,30 @@ const styles = StyleSheet.create({
   navLogo: {
     width: 54,
     height: 54,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   signInButton: {
-    backgroundColor: '#3178C6',
+    backgroundColor: "#3178C6",
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 8,
   },
   signInText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   profileContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 2,
-    borderColor: '#3178C6',
+    borderColor: "#3178C6",
   },
   profilePicture: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
 });
