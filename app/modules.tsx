@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
-import { db } from "@/firebase"; // Ensure correct path to Firebase configuration
+import { db } from "@/firebase";
 import { getAuth } from "firebase/auth";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -19,10 +19,10 @@ import imageMapping from "./imagemapping";
 
 export default function ModuleDetails() {
   const router = useRouter();
-  const { moduleId } = useGlobalSearchParams(); // Dynamically get moduleId from the route
+  const { moduleId } = useGlobalSearchParams();
   const [moduleData, setModuleData] = useState<any>(null);
   const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
-  const [userId, setUserId] = useState<string>(""); // Replace with authenticated user ID
+  const [userId, setUserId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
   const [currentVideoDetails, setCurrentVideoDetails] = useState<any>(null);
@@ -92,19 +92,25 @@ export default function ModuleDetails() {
         }
 
         // update user last opened module
-        const userProgressRef = doc(db, "user_progress", userId);
-        const userProgressSnap = await getDoc(userProgressRef);
+        try {
+          const userProgressRef = doc(db, "user_progress", userId);
+          const userProgressSnap = await getDoc(userProgressRef);
 
-        if (!userProgressSnap.exists()) {
-          await setDoc(doc(db, "user_progress", userId), {
-            lastOpenedModule: moduleId,
-          });
-          console.log("Created User progress", userId, moduleId);
-        } else {
-          await updateDoc(doc(db, "user_progress", userId), {
-            lastOpenedModule: moduleId,
-          });
-          console.log("Updated User progress", userId, moduleId);
+          console.log(userProgressSnap.data());
+
+          if (!userProgressSnap.exists()) {
+            await setDoc(doc(db, "user_progress", userId), {
+              lastOpenedModule: moduleId,
+            });
+            console.log("Created User progress", userId, moduleId);
+          } else {
+            await updateDoc(doc(db, "user_progress", userId), {
+              lastOpenedModule: moduleId,
+            });
+            console.log("Updated User progress", userId, moduleId);
+          }
+        } catch (e) {
+          console.log("Error updating user last opened module", e);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -243,8 +249,8 @@ const styles = StyleSheet.create({
     web: {
       flex: 1,
       backgroundColor: "#fff",
-      alignItems: "center", // Center the app horizontally
-      justifyContent: "center", // Center the app vertically
+      alignItems: "center",
+      justifyContent: "center",
     },
     default: {
       flex: 1,
@@ -292,7 +298,8 @@ const styles = StyleSheet.create({
   moduleTitle: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "gray",
+    color: "#888",
+    marginBottom: 2,
   },
   videoTitle: {
     fontSize: 24,
@@ -325,7 +332,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   line: {
-    backgroundColor: "#3178C6",
+    backgroundColor: "#ccc",
     width: "100%",
     height: 3,
     borderRadius: 10,

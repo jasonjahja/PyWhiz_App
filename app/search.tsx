@@ -41,7 +41,19 @@ export default function SearchScreen() {
     return null;
   };
 
-  // Monitor Authentication
+  const getCategoryStyle = (category: string) => {
+    switch (category) {
+      case "Beginner":
+        return { textColor: "#3178C6" };
+      case "Intermediate":
+        return { textColor: "#856404" };
+      case "Expert":
+        return { textColor: "#842029" };
+      default:
+        return { textColor: "#333" };
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -129,27 +141,32 @@ export default function SearchScreen() {
     setResults(filtered);
   };
 
-  const renderSearchResult = ({ item }: { item: Course }) => (
-    <TouchableOpacity
-      style={styles.resultItem}
-      onPress={() =>
-        router.push({
-          pathname: `/modules`,
-          params: { moduleId: `${item.id}` },
-        })
-      } // Navigate to course page
-    >
-      <Image source={getImage(item.thumbnail)} style={styles.resultImage} />
-      <View style={styles.resultText}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.details}>{item.category}</Text>
-        <Text style={styles.details}>{item.videos}</Text>
-      </View>
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>{item.progress}%</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderSearchResult = ({ item }: { item: Course }) => {
+    const { textColor } = getCategoryStyle(item.category);
+    return (
+      <TouchableOpacity
+        style={styles.resultItem}
+        onPress={() =>
+          router.push({
+            pathname: `/modules`,
+            params: { moduleId: `${item.id}` },
+          })
+        } // Navigate to course page
+      >
+        <Image source={getImage(item.thumbnail)} style={styles.resultImage} />
+        <View style={styles.resultText}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.details}>{item.category}</Text>
+          <Text style={[styles.details, { color: textColor }]}>
+            {item.videos}
+          </Text>
+        </View>
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>{item.progress}%</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>

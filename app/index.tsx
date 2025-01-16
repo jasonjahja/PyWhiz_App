@@ -1,4 +1,4 @@
-import { Image, StyleSheet, ScrollView } from "react-native";
+import { Image, StyleSheet, ScrollView, Platform } from "react-native";
 import Navbar from "@/components/ui/Navbar";
 
 import { Text, View } from "react-native";
@@ -68,13 +68,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center", // Center the app horizontally
-    justifyContent: "center", // Center the app vertically
+    alignItems: "center",
+    justifyContent: "center",
   },
-  scrollView: {
-    width: 375,
-    flex: 1,
-  },
+  scrollView: Platform.select({
+    web: {
+      width: 375,
+      flex: 1,
+    },
+    default: {
+      flex: 1,
+    },
+  }),
   scrollViewContent: {
     paddingTop: 124,
   },

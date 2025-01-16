@@ -94,14 +94,14 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   nextButton: {
-    backgroundColor: "#4caf50",
+    backgroundColor: "#3178C6",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",
     marginHorizontal: 8,
   },
   homeButton: {
-    backgroundColor: "#2196f3",
+    backgroundColor: "#333",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",

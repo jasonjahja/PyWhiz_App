@@ -188,9 +188,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#3178C6",
+    color: "#4A4A4A",
+    marginTop: -6,
   },
   section: {
     marginBottom: 24,
