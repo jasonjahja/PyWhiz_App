@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
+    backgroundColor: '#fff',
   },
   widthcontainer: Platform.select({
     web: {
