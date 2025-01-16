@@ -10,6 +10,7 @@ import {
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase"; // Ensure correct path to Firebase configuration
+import { getAuth } from "firebase/auth";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Icon from "react-native-vector-icons/Ionicons";
 import VideoCard from "@/components/ui/VideoCard";
@@ -21,7 +22,7 @@ export default function ModuleDetails() {
   const { moduleId } = useGlobalSearchParams(); // Dynamically get moduleId from the route
   const [moduleData, setModuleData] = useState<any>(null);
   const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
-  const [userId, setUserId] = useState<string>("8hzRnSqWVZXH1zEIvm2Ayrps9442"); // Replace with authenticated user ID
+  const [userId, setUserId] = useState<string>(""); // Replace with authenticated user ID
   const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
   const [currentVideoDetails, setCurrentVideoDetails] = useState<any>(null);
@@ -67,6 +68,8 @@ export default function ModuleDetails() {
         } else {
           console.error(`Module with ID "${moduleId}" not found.`);
         }
+
+        setUserId(getAuth().currentUser?.uid || ""); // Replace with authenticated user ID
 
         // Fetch user's watched videos
         const progressRef = doc(
