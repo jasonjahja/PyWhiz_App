@@ -1,105 +1,132 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
-  TouchableOpacity,
-  TextInput,
   ScrollView,
-} from 'react-native';
-import { auth } from '@/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'expo-router';
+  TouchableOpacity,
+  Platform,
+  Image,
+} from "react-native";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { db, auth } from "@/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "expo-router";
 import Icon from 'react-native-vector-icons/Ionicons';
-import StretchedCourseCard from '@/components/ui/StretchedCourseCards';
+import StretchedCourseCard from "@/components/ui/StretchedCourseCards";
 
-const allCourses = [
-  {
-    id: '1',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 1 - Python Print',
-    progress: 60,
-    category: 'Beginner',
-    videos: 4,
-  },
-  {
-    id: '2',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 2 - Conditional',
-    progress: 10,
-    category: 'Beginner',
-    videos: 4,
-  },
-  {
-    id: '3',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 3 - Loops',
-    progress: 5,
-    category: 'Beginner',
-    videos: 4,
-  },
-  {
-    id: '4',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 4 - Functions',
-    progress: 0,
-    category: 'Beginner',
-    videos: 4,
-  },
-  {
-    id: '5',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 5 - Advanced Loops',
-    progress: 40,
-    category: 'Intermediate',
-    videos: 6,
-  },
-  {
-    id: '6',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 6 - Data Structures',
-    progress: 30,
-    category: 'Intermediate',
-    videos: 5,
-  },
-  {
-    id: '7',
-    thumbnail: require('@/assets/images/python-logo.png'),
-    title: 'Module 7 - Algorithms',
-    progress: 0,
-    category: 'Expert',
-    videos: 7,
-  },
-];
+type Course = {
+  id: string;
+  thumbnail: any;
+  title: string;
+  progress: number;
+  category: string;
+  totalVideos: number;
+  watchedVideos: number;
+  description: string;
+};
 
-export default function HomePage() {
-  const [name, setName] = useState('');
+export default function ModuleOverview() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState('Beginner'); // Track selected category
-  const [filteredCourses, setFilteredCourses] = useState(
-    allCourses.filter((course) => course.category === 'Beginner')
-  );
 
+  // Fetch user ID from auth
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setName(user.displayName || 'Guest');
+        setUserId(user.uid);
       } else {
-        router.replace('/login');
+        setUserId(null);
       }
     });
-
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
+  // Fetch courses and user progress from Firestore
+  useEffect(() => {
+    const fetchCoursesWithProgress = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "module"));
+        const fetchedCourses: Course[] = [];
+
+        for (const docSnap of querySnapshot.docs) {
+          const courseData = docSnap.data() as Omit<
+            Course,
+            "id" | "watchedVideos" | "progress"
+          >;
+
+          let watchedVideos = 0;
+
+          // Fetch user-specific progress for the module
+          if (userId) {
+            const userProgressRef = doc(
+              db,
+              "user_module_progress",
+              `${userId}_${docSnap.id}`
+            );
+            const userProgressSnap = await getDoc(userProgressRef);
+
+            if (userProgressSnap.exists()) {
+              const userProgressData = userProgressSnap.data();
+              watchedVideos = (userProgressData.watchedVideos || []).length;
+              console.log("Watched videos:", watchedVideos);
+            }
+          }
+
+          fetchedCourses.push({
+            id: docSnap.id,
+            ...courseData,
+            watchedVideos,
+            progress: Math.round(
+              (watchedVideos / courseData.totalVideos) * 100
+            ),
+          });
+        }
+
+        if (selectedCategory === "All") {
+          setCourses(fetchedCourses);
+          setFilteredCourses(fetchedCourses);
+        } else {
+          setCourses(fetchedCourses);
+          setFilteredCourses(
+            fetchedCourses.filter(
+              (course) => course.category === selectedCategory
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching courses or progress:", error);
+      }
+    };
+
+    if (userId) {
+      fetchCoursesWithProgress();
+    }
+  }, [userId, selectedCategory]);
+
+  // Filter courses by category
   const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setFilteredCourses(allCourses.filter((course) => course.category === category));
+    if (category == "All") {
+      setFilteredCourses(courses);
+      setSelectedCategory(category);
+      return;
+    } else {
+      setSelectedCategory(category);
+      setFilteredCourses(
+        courses.filter((course) => course.category === category)
+      );
+    }
   };
 
-  const handleCoursePress = (course: string) => {
-    console.log('Course Pressed:', course);
+  // Navigate to specific module
+  const handleCoursePress = (courseId: string) => {
+    router.push({
+      pathname: `/modules`,
+      params: { moduleId: `${courseId}` },
+    });
   };
 
   return (
@@ -124,49 +151,34 @@ export default function HomePage() {
         {/* Categories Section */}
         <View style={styles.categoriesContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                selectedCategory === 'Beginner' ? styles.blueCategory : styles.grayCategory,
-              ]}
-              onPress={() => handleCategorySelect('Beginner')}
-            >
-              <Text style={styles.categoryText}>Beginner</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                selectedCategory === 'Intermediate' ? styles.blueCategory : styles.grayCategory,
-              ]}
-              onPress={() => handleCategorySelect('Intermediate')}
-            >
-              <Text style={styles.categoryText}>Intermediate</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                selectedCategory === 'Expert' ? styles.blueCategory : styles.grayCategory,
-              ]}
-              onPress={() => handleCategorySelect('Expert')}
-            >
-              <Text style={styles.categoryText}>Expert</Text>
-            </TouchableOpacity>
+            {["All", "Beginner", "Intermediate", "Expert"].map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === category
+                    ? styles.blueCategory
+                    : styles.grayCategory,
+                ]}
+                onPress={() => handleCategorySelect(category)}
+              >
+                <Text style={styles.categoryText}>{category}</Text>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         </View>
 
         {/* Hero Section */}
         <Text style={styles.aboveHeroTitle}>Latest Learned</Text>
         <View style={styles.heroContainer}>
-          {/* Background Illustration */}
           <View style={styles.background}>
             <Image
-              source={require('@/assets/images/python-logo.png')} // Replace with your illustration path
+              source={require("@/assets/images/python-logo.png")} // Replace with your illustration path
               style={styles.illustration}
               resizeMode="contain"
             />
           </View>
 
-          {/* Text Content */}
           <View style={styles.heroContent}>
             <Text style={styles.heroTitle}>Module 1 - Python print</Text>
             <Text style={styles.heroSubtitle}>Part 1 - 24 Minutes</Text>
@@ -178,12 +190,17 @@ export default function HomePage() {
           {filteredCourses.map((course) => (
             <StretchedCourseCard
               key={course.id}
-              onPress={() => handleCoursePress(course.title)}
-              thumbnail={course.thumbnail}
+              onPress={() => handleCoursePress(course.id)}
+              thumbnail={
+                course.thumbnail
+                  ? { uri: course.thumbnail }
+                  : require("@/assets/images/python-logo.png")
+              }
               title={course.title}
               progress={course.progress}
               category={course.category}
-              videos={course.videos}
+              videos={course.watchedVideos}
+              totalVideo={course.totalVideos}
             />
           ))}
         </View>
@@ -193,15 +210,31 @@ export default function HomePage() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContainer: {
-    flex: 1,
-    paddingHorizontal: 18,
-    marginTop: 54,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center", // Center the app horizontally
+      justifyContent: "center", // Center the app vertically
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#fff",
+    },
+  }),
+  scrollContainer: Platform.select({
+    web: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 54,
+      width: 375,
+    },
+    default: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 54,
+    },
+  }),
   // Header Section
   header: {
     flexDirection: 'row',
@@ -217,7 +250,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4A4A4A',
   },
-  // Categories Section
   categoriesContainer: {
     marginBottom: 18,
   },
@@ -228,15 +260,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   blueCategory: {
-    backgroundColor: '#3178C6',
+    backgroundColor: "#3178C6",
   },
   grayCategory: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
   },
   categoryText: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   coursesContainer: {
     marginBottom: 154,
@@ -247,47 +279,47 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     marginBottom: 12,
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
+    fontWeight: "bold",
+    color: "#4A4A4A",
   },
   heroContainer: {
-    backgroundColor: '#F8E1DB',
+    backgroundColor: "#F8E1DB",
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     padding: 16,
     marginBottom: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     height: 200,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 6,
   },
   background: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
-    right: '-35%',
+    right: "-35%",
     bottom: 0,
-    width: '100%',
+    width: "100%",
     opacity: 0.5,
   },
   illustration: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   heroContent: {
     flex: 1,
   },
   heroTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   heroSubtitle: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
     marginBottom: 12,
   },
 });

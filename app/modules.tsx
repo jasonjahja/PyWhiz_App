@@ -1,36 +1,172 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-// import { ResizeMode, Video } from 'expo-av';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
-import VideoCard from '@/components/ui/VideoCard';
-import Video from 'react-native-video';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from "react-native";
+import { useRouter, useGlobalSearchParams } from "expo-router";
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import { db } from "@/firebase"; 
+import { useVideoPlayer, VideoView } from "expo-video";
+import Icon from "react-native-vector-icons/Ionicons";
+import VideoCard from "@/components/ui/VideoCard";
+import videoMapping from "./videomapping";
+import imageMapping from "./imagemapping";
 
 export default function ModuleDetails() {
   const router = useRouter();
+  const { moduleId } = useGlobalSearchParams(); 
+  const [moduleData, setModuleData] = useState<any>(null);
+  const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
+  const [userId, setUserId] = useState<string>("8hzRnSqWVZXH1zEIvm2Ayrps9442"); 
+  const [loading, setLoading] = useState(true);
+  const [currentVideo, setCurrentVideo] = useState<any>(null);
+  const [currentVideoDetails, setCurrentVideoDetails] = useState<any>(null);
+
+  const player = useVideoPlayer(currentVideo, (player) => {
+    player.loop = true;
+  });
+
+  const getVideoSource = (fileName: string) => {
+    if (videoMapping[fileName]) {
+      return videoMapping[fileName];
+    }
+    console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
+
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Image file not found: ${fileName}`);
+    return null;
+  };
+
+  useEffect(() => {
+    const fetchModuleData = async () => {
+      if (!moduleId) {
+        console.error("Module ID is missing.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch module data
+        const moduleRef = doc(db, "module", moduleId as string);
+        const moduleSnap = await getDoc(moduleRef);
+
+        if (moduleSnap.exists()) {
+          const data = moduleSnap.data();
+          setModuleData(data);
+          setCurrentVideo(getVideoSource(data.videos[0]?.url) || null); // Set the first video as default
+          setCurrentVideoDetails(data.videos[0] || null);
+        } else {
+          console.error(`Module with ID "${moduleId}" not found.`);
+        }
+
+        // Fetch user's watched videos
+        const progressRef = doc(
+          db,
+          "user_module_progress",
+          `${userId}_${moduleId}`
+        );
+        const progressSnap = await getDoc(progressRef);
+
+        if (progressSnap.exists()) {
+          const progressData = progressSnap.data();
+          setWatchedVideos(progressData.watchedVideos || []);
+        } else {
+          // Initialize progress if it doesn't exist
+          await setDoc(progressRef, {
+            userId,
+            moduleId,
+            watchedVideos: [],
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModuleData();
+  }, [moduleId, userId]);
+
+  const markVideoAsWatched = async (videoId: number) => {
+    if (watchedVideos.includes(videoId)) {
+      return; // If the video is already marked as watched, do nothing
+    }
+
+    const progressRef = doc(
+      db,
+      "user_module_progress",
+      `${userId}_${moduleId}`
+    );
+
+    const updatedWatchedVideos = [...watchedVideos, videoId]; // Add videoId to the watched list
+
+    try {
+      await updateDoc(progressRef, {
+        watchedVideos: updatedWatchedVideos,
+      });
+      setWatchedVideos(updatedWatchedVideos);
+      console.log(`Video ${videoId} marked as watched.`);
+    } catch (error) {
+      console.error("Error updating watched videos:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View>
+        <Text>Loading module details...</Text>
+      </View>
+    );
+  }
+
+  if (!moduleData) {
+    return (
+      <View>
+        <Text>Module data not available. Please try again later.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* Video Player Section */}
         <View style={styles.videoContainer}>
-          {/* <Video
-            source={{ uri: 'ADD_VIDEO_URL' }}
-            // source={{ uri: require('@/assets/images/GettingStarted.mp4') }}
+          <VideoView
             style={styles.video}
-            controls
-            resizeMode="contain"
-            onError={(e: any) => console.log('Error:', e)}
-          /> */}
-          
+            player={player}
+            allowsFullscreen
+            allowsPictureInPicture
+          />
+
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Icon name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
         </View>
 
         {/* Module Info */}
         <View style={styles.moduleInfo}>
-          <Text style={styles.moduleTitle}>Module 1 - Python Intro</Text>
+          <Text style={styles.moduleTitle}>
+            {moduleData.title || "Module Title"}
+          </Text>
+          <Text style={styles.videoTitle}>
+            {currentVideoDetails.title || "Video Title"}
+          </Text>
           <Text style={styles.moduleDescription}>
-            Module 1 - Python Intro Module 1 - Python Intro Module 1 - Python Intro
-            Module 1 - Python Intro Module 1 - Python Intro Module 1 - Python Intro
+            {currentVideoDetails.description || "No description available."}
           </Text>
         </View>
 
@@ -38,30 +174,45 @@ export default function ModuleDetails() {
         <View style={styles.otherVideos}>
           <View style={styles.otherVideosHeader}>
             <Text style={styles.sectionTitle}>Other Videos</Text>
-            <Text style={styles.videoDuration}>12 Videos - 2 hours</Text>
+            <Text style={styles.videoDuration}>
+              {moduleData.videos.length} Videos
+            </Text>
           </View>
 
           <View style={styles.line} />
-          
-          {/* Video List Items */}
-          {[1, 2, 3].map((item) => (
-            <VideoCard
-                key={item}
-                title="Judul"
-                description="Module 1 - Python Intro Module 1 - Python Intro Module 1 - Intro ..."
-                duration="12:34"
-                onPress={() => console.log(`Video ${item} pressed`)}
-            />
-            ))}
+
+          {/* Video List */}
+          {moduleData.videos.map((video: any, index: number) => {
+            const videoSource = getVideoSource(video.url);
+            return (
+              <VideoCard
+                key={index}
+                title={video.title || "Untitled Video"}
+                description={video.description || "Video description here."}
+                duration={video.duration || "--:--"}
+                isWatched={watchedVideos.includes(video.id)}
+                onPress={() => {
+                  setCurrentVideo(videoSource);
+                  setCurrentVideoDetails(video);
+                  markVideoAsWatched(video.id); // Only mark video as watched
+                }}
+                thumbnail={getImage(video.url)}
+              />
+            );
+          })}
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Icon name="chevron-back" size={24} color="#000" />
-      </TouchableOpacity>
-
       {/* Fixed Quiz Button */}
-      <TouchableOpacity style={styles.quizButton} onPress={() => router.push('/quiz')}>
+      <TouchableOpacity
+        style={styles.quizButton}
+        onPress={() =>
+          router.push({
+            pathname: `/quiz`,
+            params: { moduleId: `${moduleId}` },
+          })
+        }
+      >
         <Text style={styles.quizButtonText}>Take A Quiz!</Text>
       </TouchableOpacity>
     </View>
@@ -69,35 +220,48 @@ export default function ModuleDetails() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 18,
-    marginTop: 48,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center", 
+      justifyContent: "center", 
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#fff",
+    },
+  }),
+  scrollView: Platform.select({
+    web: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 48,
+      width: 375,
+    },
+    default: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 48,
+    },
+  }),
   backButton: {
-    position: 'absolute',
-    top: 68,
-    left: 34,
+    position: "absolute",
+    top: 14,
+    left: 14,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    // opacity: 0.5,
-    borderWidth: 1,
-    borderColor: '#ccc'
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
   },
   videoContainer: {
     borderRadius: 12,
-    aspectRatio: 11/10,
-    backgroundColor: '#f0f0f0',
-    position: 'relative',
-    overflow: 'hidden',
+    aspectRatio: 11 / 10,
+    backgroundColor: "#f0f0f0",
+    position: "relative",
+    overflow: "hidden",
   },
   video: {
     flex: 1,
@@ -107,35 +271,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   moduleTitle: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#888",
+    marginBottom: 2,
+  },
+  videoTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   moduleDescription: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#666',
-    textAlign: 'justify',
+    color: "#666",
+    textAlign: "justify",
   },
   otherVideos: {
     paddingVertical: 12,
     paddingHorizontal: 2,
-    marginBottom: 124,
+    marginBottom: 98,
   },
   otherVideosHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    // marginBottom: 12,
-    marginHorizontal: 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   videoDuration: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 8,
   },
   line: {
@@ -154,20 +322,34 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  quizButton: {
-    position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
-    backgroundColor: '#3178C6',
-    padding: 16,
-    margin: 16,
-    alignItems: 'center',
-    borderRadius: 12,
-  },
+  quizButton: Platform.select({
+    web: {
+      // position: "absolute",
+      bottom: 10,
+      left: 0,
+      right: 0,
+      backgroundColor: "#3178C6",
+      padding: 16,
+      margin: 16,
+      alignItems: "center",
+      borderRadius: 12,
+      width: 375,
+    },
+    default: {
+      position: "absolute",
+      bottom: 10,
+      left: 0,
+      right: 0,
+      backgroundColor: "#3178C6",
+      padding: 16,
+      margin: 16,
+      alignItems: "center",
+      borderRadius: 12,
+    },
+  }),
   quizButtonText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
 });

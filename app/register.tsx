@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, Alert, TouchableOpacity } from 'react-native';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'; // Add updateProfile for setting the displayName
-import { auth } from '../firebase';
-import { useRouter } from 'expo-router';
-import Icon from 'react-native-vector-icons/Ionicons';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  Alert,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"; // Add updateProfile for setting the displayName
+import { auth } from "../firebase";
+import { useRouter } from "expo-router";
+import Icon from "react-native-vector-icons/Ionicons";
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [name, setName] = useState(''); // Add state for name
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState(""); // Add state for name
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -18,12 +27,12 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill out all fields.');
+      Alert.alert("Error", "Please fill out all fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match.');
+      Alert.alert("Error", "Passwords do not match.");
       return;
     }
 
@@ -31,7 +40,11 @@ export default function RegisterScreen() {
 
     try {
       // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
       // Update the user's display name
       if (auth.currentUser) {
@@ -39,15 +52,15 @@ export default function RegisterScreen() {
           displayName: name,
         });
       } else {
-        throw new Error('No user is currently signed in.');
+        throw new Error("No user is currently signed in.");
       }
 
-      console.log('User registered:', userCredential.user);
-      Alert.alert('Success', 'Account created successfully!');
-      router.replace('/(tabs)/home');
+      console.log("User registered:", userCredential.user);
+      Alert.alert("Success", "Account created successfully!");
+      router.replace("/(tabs)/home");
     } catch (error: any) {
-      console.error('Registration error:', error.message);
-      Alert.alert('Error', error.message || 'Failed to register.');
+      console.error("Registration error:", error.message);
+      Alert.alert("Error", error.message || "Failed to register.");
     } finally {
       setLoading(false);
     }
@@ -55,73 +68,81 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
-      {/* Name Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        placeholderTextColor="#888"
-      />
-      {/* Email Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholderTextColor="#888"
-      />
-      {/* Password Input */}
-      <View style={styles.inputContainer}>
+      <View style={styles.widthcontainer}>
+        <Text style={styles.title}>Register</Text>
+        {/* Name Input */}
         <TextInput
           style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!passwordVisible}
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
           placeholderTextColor="#888"
         />
-        <TouchableOpacity
-          onPress={() => setPasswordVisible(!passwordVisible)}
-          style={styles.icon}
-        >
-          <Icon
-            name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
-            size={20}
-            color="#888"
-          />
-        </TouchableOpacity>
-      </View>
-      {/* Confirm Password Input */}
-      <View style={styles.inputContainer}>
+        {/* Email Input */}
         <TextInput
           style={styles.input}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry={!confirmPasswordVisible}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
           placeholderTextColor="#888"
         />
-        <TouchableOpacity
-          onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
-          style={styles.icon}
-        >
-          <Icon
-            name={confirmPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
-            size={20}
-            color="#888"
+        {/* Password Input */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!passwordVisible}
+            placeholderTextColor="#888"
           />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setPasswordVisible(!passwordVisible)}
+            style={styles.icon}
+          >
+            <Icon
+              name={passwordVisible ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
+        {/* Confirm Password Input */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!confirmPasswordVisible}
+            placeholderTextColor="#888"
+          />
+          <TouchableOpacity
+            onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+            style={styles.icon}
+          >
+            <Icon
+              name={confirmPasswordVisible ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
+        <Pressable
+          style={styles.button}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Registering..." : "Register"}
+          </Text>
+        </Pressable>
+        <Pressable onPress={() => router.push("/login")} style={styles.link}>
+          <Text style={styles.linkText}>Already have an account? Login</Text>
+        </Pressable>
       </View>
-      <Pressable style={styles.button} onPress={handleRegister} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Registering...' : 'Register'}</Text>
-      </Pressable>
-      <Pressable onPress={() => router.push('/login')} style={styles.link}>
-        <Text style={styles.linkText}>Already have an account? Login</Text>
-      </Pressable>
     </View>
   );
 }
@@ -129,51 +150,63 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
     backgroundColor: '#fff',
   },
+  widthcontainer: Platform.select({
+    web: {
+      width: 375,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    default: {
+      width: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  }),
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   inputContainer: {
-    width: '100%',
-    position: 'relative',
+    width: "100%",
+    position: "relative",
   },
   input: {
-    width: '100%',
+    width: "100%",
     padding: 16,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginBottom: 8,
   },
   icon: {
-    position: 'absolute',
+    position: "absolute",
     right: 16,
-    top: '50%',
+    top: "50%",
     transform: [{ translateY: -12 }],
   },
   button: {
-    backgroundColor: '#3178C6',
+    backgroundColor: "#3178C6",
     padding: 16,
     borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     marginTop: 24,
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   link: {
     marginTop: 16,
   },
   linkText: {
-    color: '#3178C6',
+    color: "#3178C6",
   },
 });
