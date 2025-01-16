@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  Image,
 } from "react-native";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
@@ -84,12 +85,17 @@ export default function ModuleOverview() {
           });
         }
 
-        setCourses(fetchedCourses);
-        setFilteredCourses(
-          fetchedCourses.filter(
-            (course) => course.category === selectedCategory
-          )
-        );
+        if (selectedCategory === "All") {
+          setCourses(fetchedCourses);
+          setFilteredCourses(fetchedCourses);
+        } else {
+          setCourses(fetchedCourses);
+          setFilteredCourses(
+            fetchedCourses.filter(
+              (course) => course.category === selectedCategory
+            )
+          );
+        }
       } catch (error) {
         console.error("Error fetching courses or progress:", error);
       }
@@ -102,10 +108,16 @@ export default function ModuleOverview() {
 
   // Filter courses by category
   const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setFilteredCourses(
-      courses.filter((course) => course.category === category)
-    );
+    if (category == "All") {
+      setFilteredCourses(courses);
+      setSelectedCategory(category);
+      return;
+    } else {
+      setSelectedCategory(category);
+      setFilteredCourses(
+        courses.filter((course) => course.category === category)
+      );
+    }
   };
 
   // Navigate to specific module
@@ -127,7 +139,7 @@ export default function ModuleOverview() {
         {/* Categories Section */}
         <View style={styles.categoriesContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {["Beginner", "Intermediate", "Expert"].map((category) => (
+            {["All", "Beginner", "Intermediate", "Expert"].map((category) => (
               <TouchableOpacity
                 key={category}
                 style={[
@@ -142,6 +154,23 @@ export default function ModuleOverview() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+        </View>
+
+        {/* Hero Section */}
+        <Text style={styles.aboveHeroTitle}>Latest Learned</Text>
+        <View style={styles.heroContainer}>
+          <View style={styles.background}>
+            <Image
+              source={require("@/assets/images/python-logo.png")} // Replace with your illustration path
+              style={styles.illustration}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View style={styles.heroContent}>
+            <Text style={styles.heroTitle}>Module 1 - Python print</Text>
+            <Text style={styles.heroSubtitle}>Part 1 - 24 Minutes</Text>
+          </View>
         </View>
 
         {/* Filtered Courses Section */}
@@ -227,5 +256,54 @@ const styles = StyleSheet.create({
   },
   coursesContainer: {
     marginBottom: 154,
+  },
+  // Hero Section
+  aboveHeroTitle: {
+    marginTop: 6,
+    marginLeft: 6,
+    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#4A4A4A",
+  },
+  heroContainer: {
+    backgroundColor: "#F8E1DB",
+    borderRadius: 12,
+    overflow: "hidden",
+    padding: 16,
+    marginBottom: 32,
+    flexDirection: "row",
+    alignItems: "center",
+    height: 200,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  background: {
+    position: "absolute",
+    top: 0,
+    right: "-35%",
+    bottom: 0,
+    width: "100%",
+    opacity: 0.5,
+  },
+  illustration: {
+    width: "100%",
+    height: "100%",
+  },
+  heroContent: {
+    flex: 1,
+  },
+  heroTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 12,
   },
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 type VideoCardProps = {
@@ -8,6 +8,7 @@ type VideoCardProps = {
   duration: string;
   isWatched: boolean;
   onPress?: () => void;
+  thumbnail: any;
 };
 
 export default function VideoCard({
@@ -16,10 +17,13 @@ export default function VideoCard({
   duration,
   isWatched,
   onPress,
+  thumbnail,
 }: VideoCardProps) {
   return (
     <TouchableOpacity style={styles.videoItem} onPress={onPress}>
-      <View style={styles.thumbnail} />
+      <View style={styles.thumbnail}>
+        <Image source={thumbnail} style={styles.courseImage} />
+      </View>
       <View style={styles.videoInfo}>
         <Text style={styles.videoTitle}>{title}</Text>
         <Text style={styles.videoDescription} numberOfLines={2}>
@@ -68,6 +72,12 @@ const styles = StyleSheet.create({
     height: 80,
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
+  },
+  courseImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+    marginBottom: 12,
   },
   videoInfo: {
     flex: 1,

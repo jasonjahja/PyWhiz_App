@@ -14,6 +14,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import Icon from "react-native-vector-icons/Ionicons";
 import VideoCard from "@/components/ui/VideoCard";
 import videoMapping from "./videomapping";
+import imageMapping from "./imagemapping";
 
 export default function ModuleDetails() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function ModuleDetails() {
   const [userId, setUserId] = useState<string>("8hzRnSqWVZXH1zEIvm2Ayrps9442"); // Replace with authenticated user ID
   const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
+  const [currentVideoDetails, setCurrentVideoDetails] = useState<any>(null);
 
   const player = useVideoPlayer(currentVideo, (player) => {
     player.loop = true;
@@ -33,6 +35,14 @@ export default function ModuleDetails() {
       return videoMapping[fileName];
     }
     console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
+
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Image file not found: ${fileName}`);
     return null;
   };
 
@@ -53,6 +63,7 @@ export default function ModuleDetails() {
           const data = moduleSnap.data();
           setModuleData(data);
           setCurrentVideo(getVideoSource(data.videos[0]?.url) || null); // Set the first video as default
+          setCurrentVideoDetails(data.videos[0] || null);
         } else {
           console.error(`Module with ID "${moduleId}" not found.`);
         }
@@ -151,8 +162,11 @@ export default function ModuleDetails() {
           <Text style={styles.moduleTitle}>
             {moduleData.title || "Module Title"}
           </Text>
+          <Text style={styles.videoTitle}>
+            {currentVideoDetails.title || "Video Title"}
+          </Text>
           <Text style={styles.moduleDescription}>
-            {moduleData.description || "No description available."}
+            {currentVideoDetails.description || "No description available."}
           </Text>
         </View>
 
@@ -179,8 +193,10 @@ export default function ModuleDetails() {
                 isWatched={watchedVideos.includes(video.id)}
                 onPress={() => {
                   setCurrentVideo(videoSource);
+                  setCurrentVideoDetails(video);
                   markVideoAsWatched(video.id); // Only mark video as watched
                 }}
+                thumbnail={getImage(video.url)}
               />
             );
           })}
@@ -255,6 +271,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   moduleTitle: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "gray",
+  },
+  videoTitle: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 8,
