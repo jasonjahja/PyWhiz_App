@@ -35,19 +35,23 @@ export default function CompletionPage() {
           </TouchableOpacity>
 
           {/* Button to go to the next module */}
-          <TouchableOpacity
-            style={styles.nextButton}
-            onPress={() =>
-              router.push({
-                pathname: `/modules`,
-                params: {
-                  moduleId: `${nextModule}`,
-                },
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Go to Module {nextModule}</Text>
-          </TouchableOpacity>
+          {nextModule < 8 ? (
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={() =>
+                router.push({
+                  pathname: `/modules`,
+                  params: {
+                    moduleId: `${nextModule}`,
+                  },
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Go to Module {nextModule}</Text>
+            </TouchableOpacity>
+          ) : (
+            <></>
+          )}
         </View>
       </View>
     </View>

@@ -55,11 +55,6 @@ export default function HomePage() {
 
         const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => {
           const videos = doc.data().videos || []; // Get the videos array, default to an empty array if not present
-          console.log(
-            "imagemapping",
-            imageMapping[videos[0].url],
-            videos[0].url
-          );
           const totalDuration = videos.reduce((acc: number, video: any) => {
             return acc + (convertTimeToNumber(video.duration) || 0); // Add up the duration of each video
           }, 0); // Initial accumulator value is 0
