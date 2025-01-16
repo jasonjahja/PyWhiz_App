@@ -145,28 +145,36 @@ export default function ModuleOverview() {
               (watchedVideos / courseData.totalVideos) * 100
             ),
           });
-        }
 
-        if (selectedCategory === "All") {
-          setCourses(fetchedCourses);
-          setFilteredCourses(fetchedCourses);
-        } else {
-          setCourses(fetchedCourses);
-          setFilteredCourses(
-            fetchedCourses.filter(
-              (course) => course.category === selectedCategory
-            )
-          );
+          if (selectedCategory === "All") {
+            setCourses(fetchedCourses);
+            setFilteredCourses(fetchedCourses);
+          } else {
+            setCourses(fetchedCourses);
+            setFilteredCourses(
+              fetchedCourses.filter(
+                (course) => course.category === selectedCategory
+              )
+            );
+          }
         }
       } catch (error) {
         console.error("Error fetching courses or progress:", error);
       }
     };
 
+    const fetchLastOpenedModule = async () => {
+      if (userId) {
+      }
+    };
+
+    if (userId) {
+    }
+
     if (userId) {
       fetchCoursesWithProgress();
     }
-  }, [userId, selectedCategory]);
+  }, [userId]);
 
   // Filter courses by category
   const handleCategorySelect = (category: string) => {
@@ -316,9 +324,9 @@ const styles = StyleSheet.create({
   }),
   // Header Section
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 28,
   },
   iconButton: {
@@ -326,8 +334,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4A4A4A',
+    fontWeight: "bold",
+    color: "#4A4A4A",
   },
   categoriesContainer: {
     marginBottom: 18,
