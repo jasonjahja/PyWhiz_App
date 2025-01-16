@@ -14,6 +14,7 @@ import CourseCard from "@/components/ui/CourseCard";
 import { useUser } from "@/contexts/UserContext";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
+import imageMapping from "../imagemapping";
 
 interface Course {
   id: string;
@@ -22,6 +23,7 @@ interface Course {
   title: string;
   duration: number;
   users: number;
+  videos: Array<any>;
 }
 
 function convertTimeToNumber(time: string) {
@@ -37,6 +39,14 @@ export default function HomePage() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [filteredCourse, setFilteredCourse] = useState<Course | null>(null);
 
+  const getImage = (fileName: string) => {
+    if (imageMapping[fileName]) {
+      return imageMapping[fileName];
+    }
+    console.error(`Video file not found: ${fileName}`);
+    return null;
+  };
+
   // Fetch courses from Firestore
   useEffect(() => {
     const fetchCourses = async () => {
@@ -45,6 +55,11 @@ export default function HomePage() {
 
         const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => {
           const videos = doc.data().videos || []; // Get the videos array, default to an empty array if not present
+          console.log(
+            "imagemapping",
+            imageMapping[videos[0].url],
+            videos[0].url
+          );
           const totalDuration = videos.reduce((acc: number, video: any) => {
             return acc + (convertTimeToNumber(video.duration) || 0); // Add up the duration of each video
           }, 0); // Initial accumulator value is 0
@@ -56,6 +71,7 @@ export default function HomePage() {
             title: doc.data().title || "Untitled",
             duration: totalDuration, // Use the aggregated total duration
             users: doc.data().users || 0, // Replace 'users' with your Firestore users field name
+            videos: doc.data().videos || [],
           };
         });
 
@@ -201,7 +217,7 @@ export default function HomePage() {
           <Text style={styles.sectionTitle}>Learn Our Most Popular Course</Text>
           {filteredCourse ? (
             <CourseCard
-              image={{ uri: filteredCourse.image }}
+              image={getImage(filteredCourse.videos[0].url)}
               category={filteredCourse.category}
               title={filteredCourse.title}
               duration={filteredCourse.duration}
