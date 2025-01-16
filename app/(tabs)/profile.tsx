@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,45 +7,54 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  ScrollView 
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { auth } from '@/firebase';
-import { updateProfile, reauthenticateWithCredential, updatePassword, EmailAuthProvider, signOut } from 'firebase/auth';
-import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { useUser } from '@/contexts/UserContext';
+  ScrollView,
+  Platform,
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { auth } from "@/firebase";
+import {
+  updateProfile,
+  reauthenticateWithCredential,
+  updatePassword,
+  EmailAuthProvider,
+  signOut,
+} from "firebase/auth";
+import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { useUser } from "@/contexts/UserContext";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, setUser } = useUser();
-  const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || '');
+  const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || "");
   const [tempPhotoURL, setTempPhotoURL] = useState<string | null>(null); // Temporary photo URL
-  const [name, setName] = useState(user?.displayName || '');
-  const [email] = useState(user?.email || '');
-  const [oldPassword, setOldPassword] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState(user?.displayName || "");
+  const [email] = useState(user?.email || "");
+  const [oldPassword, setOldPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [oldPasswordVisible, setOldPasswordVisible] = useState(false);
-  
 
   const handleEditPhoto = async () => {
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert('Error', 'No user is currently signed in.');
+      Alert.alert("Error", "No user is currently signed in.");
       return;
     }
 
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need permissions to access your gallery.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "We need permissions to access your gallery."
+      );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
+      mediaTypes: "images",
       allowsEditing: true,
       quality: 1,
     });
@@ -53,86 +62,101 @@ export default function ProfileScreen() {
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri;
       setTempPhotoURL(selectedImageUri); // Temporarily store the selected image URI
-      Alert.alert('Info', 'Profile picture will be saved when you click "Save Changes".');
+      Alert.alert(
+        "Info",
+        'Profile picture will be saved when you click "Save Changes".'
+      );
     }
   };
-  
-  
+
   const handleSaveChanges = async () => {
     const user = auth.currentUser;
-  
+
     if (!user) {
-      Alert.alert('Error', 'No user is currently signed in.');
+      Alert.alert("Error", "No user is currently signed in.");
       return;
     }
-  
+
     if (!name) {
-      Alert.alert('Error', 'Name cannot be empty.');
+      Alert.alert("Error", "Name cannot be empty.");
       return;
     }
-  
+
     // If the user is trying to change the password
     if (password) {
       if (!oldPassword) {
-        Alert.alert('Error', 'You must enter your old password to set a new password.');
+        Alert.alert(
+          "Error",
+          "You must enter your old password to set a new password."
+        );
         return;
       }
-  
+
       try {
         // Re-authenticate the user with their old password
-        const credential = EmailAuthProvider.credential(user.email!, oldPassword);
+        const credential = EmailAuthProvider.credential(
+          user.email!,
+          oldPassword
+        );
         await reauthenticateWithCredential(user, credential);
-  
+
         // Update the password
         await updatePassword(user, password);
-  
-        Alert.alert('Success', 'Password updated successfully!');
+
+        Alert.alert("Success", "Password updated successfully!");
       } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to update password.');
+        Alert.alert("Error", error.message || "Failed to update password.");
         return;
       }
     }
-  
+
     // Update the display name
     if (user.displayName !== name) {
       try {
         await updateProfile(user, { displayName: name });
         setUser(auth.currentUser);
-        Alert.alert('Success', 'Profile updated successfully!');
+        Alert.alert("Success", "Profile updated successfully!");
       } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to update profile.');
+        Alert.alert("Error", error.message || "Failed to update profile.");
       }
     }
 
-     // Save the new photo URL if there is a temporary photo URL
-     if (tempPhotoURL && tempPhotoURL !== photoURL) {
+    // Save the new photo URL if there is a temporary photo URL
+    if (tempPhotoURL && tempPhotoURL !== photoURL) {
       try {
         await updateProfile(user, { photoURL: tempPhotoURL });
         setPhotoURL(tempPhotoURL); // Update local state after saving
         setTempPhotoURL(null); // Clear temporary state
-        Alert.alert('Success', 'Profile updated successfully!');
+        Alert.alert("Success", "Profile updated successfully!");
       } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to update profile picture.');
+        Alert.alert(
+          "Error",
+          error.message || "Failed to update profile picture."
+        );
         return;
       }
     }
   };
 
-  const isSaveDisabled = user?.displayName === name && password === '' && oldPassword === '' && !tempPhotoURL;;   
+  const isSaveDisabled =
+    user?.displayName === name &&
+    password === "" &&
+    oldPassword === "" &&
+    !tempPhotoURL;
 
   const handleLogout = () => {
-    Alert.alert('Confirm Logout', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
       {
-        text: 'Logout',
-        style: 'destructive',
+        text: "Logout",
+        style: "destructive",
         onPress: async () => {
           try {
             await signOut(auth);
             setUser(null); // Clear the UserContext
-            router.replace('/');
+            router.replace("/");
           } catch (error: any) {
-            Alert.alert('Error', error.message || 'Failed to log out.');
+            Alert.alert("Error", error.message || "Failed to log out.");
           }
         },
       },
@@ -141,135 +165,164 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-        <ScrollView>
-            <View style={styles.content}>
-                {/* Header Section */}
-                <View style={styles.header}>
-                  {/* Back Button */}
-                  <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-                    <Icon name="chevron-back" size={24} color="#000" />
-                  </TouchableOpacity>
-        
-                  {/* Title */}
-                  <Text style={styles.title}>Profile</Text>
-        
-                  {/* Settings Button */}
-                  <TouchableOpacity onPress={() => router.push('/settings')} style={styles.iconButton}>
-                    <Icon name="settings-outline" size={24} color="#000" />
-                  </TouchableOpacity>
-                </View>
+      <ScrollView>
+        <View style={styles.content}>
+          {/* Header Section */}
+          <View style={styles.header}>
+            {/* Back Button */}
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.iconButton}
+            >
+              <Icon name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
 
-                {/* Profile Picture */}
-                <View style={styles.profilePictureContainer}>
-                  <Image
-                    source={
-                      tempPhotoURL
-                        ? { uri: tempPhotoURL }
-                        : photoURL
-                        ? { uri: photoURL }
-                        : require('@/assets/images/avatar-placeholder.jpg')
-                    }
-                    style={styles.profilePicture}
-                    onError={() => setTempPhotoURL(null)} // Optional error handling
-                  />
-                  <TouchableOpacity style={styles.editPhotoButton} onPress={handleEditPhoto}>
-                    <Icon name="pencil" size={16} color="#fff" />
-                    <Text style={styles.editPhotoText}>Edit Photo</Text>
-                  </TouchableOpacity>
-                </View>
+            {/* Title */}
+            <Text style={styles.title}>Profile</Text>
 
-                {/* Profile Form */}
-                <View style={styles.form}>
-                    <Text style={styles.label}>Name</Text>
-                    <TextInput
-                    style={styles.input}
-                    value={name}
-                    onChangeText={setName}
-                    placeholder="Enter your name"
-                    />
+            {/* Settings Button */}
+            <TouchableOpacity
+              onPress={() => router.push("/settings")}
+              style={styles.iconButton}
+            >
+              <Icon name="settings-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
 
-                    <Text style={styles.label}>Email</Text>
-                    <TextInput
-                    style={[styles.input, styles.readOnlyInput]}
-                    value={email}
-                    editable={false}
-                    />
+          {/* Profile Picture */}
+          <View style={styles.profilePictureContainer}>
+            <Image
+              source={
+                tempPhotoURL
+                  ? { uri: tempPhotoURL }
+                  : photoURL
+                  ? { uri: photoURL }
+                  : require("@/assets/images/avatar-placeholder.jpg")
+              }
+              style={styles.profilePicture}
+              onError={() => setTempPhotoURL(null)} // Optional error handling
+            />
+            <TouchableOpacity
+              style={styles.editPhotoButton}
+              onPress={handleEditPhoto}
+            >
+              <Icon name="pencil" size={16} color="#fff" />
+              <Text style={styles.editPhotoText}>Edit Photo</Text>
+            </TouchableOpacity>
+          </View>
 
-                    <Text style={styles.label}>New Password</Text>
-                    <Text style={styles.description}>
-                        * Input your current password below for verification to change password.
-                    </Text>
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter new password"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={!passwordVisible}
-                        />
-                        <TouchableOpacity
-                            onPress={() => setPasswordVisible(!passwordVisible)}
-                            style={styles.icon}
-                        >
-                            <Icon
-                            name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
-                            size={20}
-                            color="#888"
-                            />
-                        </TouchableOpacity>
-                    </View>
+          {/* Profile Form */}
+          <View style={styles.form}>
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter your name"
+            />
 
-                    <Text style={styles.label}>Old Password</Text>
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your old password"
-                            value={oldPassword}
-                            onChangeText={setOldPassword}
-                            secureTextEntry={!oldPasswordVisible}
-                        />
-                        <TouchableOpacity
-                            onPress={() => setOldPasswordVisible(!oldPasswordVisible)}
-                            style={styles.icon}
-                        >
-                            <Icon
-                            name={oldPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
-                            size={20}
-                            color="#888"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={[styles.input, styles.readOnlyInput]}
+              value={email}
+              editable={false}
+            />
 
-                {/* Buttons */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                        <Text style={styles.logoutButtonText}>Logout</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.saveButton, isSaveDisabled && styles.disabledButton]} onPress={handleSaveChanges} disabled={isSaveDisabled}>
-                        <Text style={styles.saveButtonText}>Save Changes</Text>
-                    </TouchableOpacity>
-                </View>
+            <Text style={styles.label}>New Password</Text>
+            <Text style={styles.description}>
+              * Input your current password below for verification to change
+              password.
+            </Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter new password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!passwordVisible}
+              />
+              <TouchableOpacity
+                onPress={() => setPasswordVisible(!passwordVisible)}
+                style={styles.icon}
+              >
+                <Icon
+                  name={passwordVisible ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#888"
+                />
+              </TouchableOpacity>
             </View>
-        </ScrollView>
+
+            <Text style={styles.label}>Old Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your old password"
+                value={oldPassword}
+                onChangeText={setOldPassword}
+                secureTextEntry={!oldPasswordVisible}
+              />
+              <TouchableOpacity
+                onPress={() => setOldPasswordVisible(!oldPasswordVisible)}
+                style={styles.icon}
+              >
+                <Icon
+                  name={oldPasswordVisible ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.saveButton,
+                isSaveDisabled && styles.disabledButton,
+              ]}
+              onPress={handleSaveChanges}
+              disabled={isSaveDisabled}
+            >
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#f5f5f5",
+      alignItems: "center", // Center the app horizontally
+      justifyContent: "center", // Center the app vertically
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#f5f5f5",
+    },
+  }),
   content: {
     flex: 1,
     paddingHorizontal: 18,
     marginTop: 54,
+    // width: 375,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 28,
   },
   iconButton: {
@@ -277,11 +330,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4A4A4A', // Dark grayish-blue
+    fontWeight: "bold",
+    color: "#4A4A4A", // Dark grayish-blue
   },
   profilePictureContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   profilePicture: {
@@ -289,19 +342,19 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 2,
-    borderColor: '#3178C6',
+    borderColor: "#3178C6",
   },
   editPhotoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3178C6',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#3178C6",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     marginTop: 10,
   },
   editPhotoText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
     marginLeft: 4,
   },
@@ -311,72 +364,72 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
-    color: '#333',
+    color: "#333",
   },
   description: {
     fontSize: 10,
-    color: '#666',
+    color: "#666",
     marginTop: -2,
     marginBottom: 6,
     lineHeight: 16,
-    textAlign: 'left',
-    fontStyle: 'italic',
+    textAlign: "left",
+    fontStyle: "italic",
   },
   input: {
-    width: '100%',
+    width: "100%",
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     marginBottom: 18,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   readOnlyInput: {
-    backgroundColor: '#EDEDED',
+    backgroundColor: "#EDEDED",
   },
   passwordContainer: {
-    position: 'relative',
+    position: "relative",
   },
   icon: {
-    position: 'absolute',
+    position: "absolute",
     right: 12,
-    top: '20%',
+    top: "20%",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
   saveButton: {
     flex: 1,
-    backgroundColor: '#3178C6',
+    backgroundColor: "#3178C6",
     paddingVertical: 12,
     marginLeft: 8,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   disabledButton: {
-    backgroundColor: '#CCC',
+    backgroundColor: "#CCC",
   },
   saveButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   logoutButton: {
     flex: 1,
-    backgroundColor: '#333',
+    backgroundColor: "#333",
     paddingVertical: 12,
     marginRight: 8,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   logoutButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

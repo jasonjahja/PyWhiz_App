@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
@@ -23,7 +24,7 @@ type Course = {
   description: string;
 };
 
-const ModuleOverview: React.FC = () => {
+export default function ModuleOverview() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("Beginner");
@@ -50,7 +51,6 @@ const ModuleOverview: React.FC = () => {
         const fetchedCourses: Course[] = [];
 
         for (const docSnap of querySnapshot.docs) {
-          console.log(docSnap.data());
           const courseData = docSnap.data() as Omit<
             Course,
             "id" | "watchedVideos" | "progress"
@@ -166,18 +166,34 @@ const ModuleOverview: React.FC = () => {
       </ScrollView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scrollContainer: {
-    flex: 1,
-    paddingHorizontal: 18,
-    marginTop: 54,
-  },
+  container: Platform.select({
+    web: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center", // Center the app horizontally
+      justifyContent: "center", // Center the app vertically
+    },
+    default: {
+      flex: 1,
+      backgroundColor: "#fff",
+    },
+  }),
+  scrollContainer: Platform.select({
+    web: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 54,
+      width: 375,
+    },
+    default: {
+      flex: 1,
+      paddingHorizontal: 18,
+      marginTop: 54,
+    },
+  }),
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -213,5 +229,3 @@ const styles = StyleSheet.create({
     marginBottom: 154,
   },
 });
-
-export default ModuleOverview;
