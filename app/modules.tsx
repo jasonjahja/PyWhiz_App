@@ -90,6 +90,22 @@ export default function ModuleDetails() {
             watchedVideos: [],
           });
         }
+
+        // update user last opened module
+        const userProgressRef = doc(db, "user_progress", userId);
+        const userProgressSnap = await getDoc(userProgressRef);
+
+        if (!userProgressSnap.exists()) {
+          await setDoc(doc(db, "user_progress", userId), {
+            lastOpenedModule: moduleId,
+          });
+          console.log("Created User progress", userId, moduleId);
+        } else {
+          await updateDoc(doc(db, "user_progress", userId), {
+            lastOpenedModule: moduleId,
+          });
+          console.log("Updated User progress", userId, moduleId);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {

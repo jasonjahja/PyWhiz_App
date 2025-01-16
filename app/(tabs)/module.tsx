@@ -27,11 +27,19 @@ type Course = {
   videos: any;
 };
 
+type LastOpenedModule = {
+  lastOpenedModule: string;
+};
+
 export default function ModuleOverview() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("Beginner");
   const [userId, setUserId] = useState<string | null>(null);
+  const [lastOpenedModule, setLastOpenedModule] = useState<any | null>(null);
+  const [lastOpenedModuleData, setLastOpenedModuleData] = useState<any | null>(
+    null
+  );
   const router = useRouter();
 
   const getImage = (fileName: string) => {
@@ -82,6 +90,49 @@ export default function ModuleOverview() {
               const userProgressData = userProgressSnap.data();
               watchedVideos = (userProgressData.watchedVideos || []).length;
               console.log("Watched videos:", watchedVideos);
+            } else {
+              console.log(
+                `No progress found for user "${userId}" in module "${docSnap.id}".`
+              );
+            }
+
+            // last opened module data
+            const userLastOpenedModuleRef = doc(db, "user_progress", userId);
+            const userLastOpenedModuleSnap = await getDoc(
+              userLastOpenedModuleRef
+            );
+
+            const lastOpenedModule = userLastOpenedModuleSnap.data();
+
+            console.log(
+              "user last opened module",
+              userLastOpenedModuleSnap.data()
+            );
+
+            if (userLastOpenedModuleSnap.exists()) {
+              const data = userLastOpenedModuleSnap.data();
+              setLastOpenedModule(data);
+            }
+
+            console.log("Last opened module variable:", lastOpenedModule);
+
+            // get the data of the last opened module
+            console.log(
+              "last opened module",
+              lastOpenedModule?.lastOpenedModule
+            );
+            const lastOpenedModuleRef = doc(
+              db,
+              "module",
+              lastOpenedModule?.lastOpenedModule
+            );
+            const lastOpenedModuleSnap = await getDoc(lastOpenedModuleRef);
+
+            console.log("last opened module data", lastOpenedModuleSnap.data());
+
+            if (lastOpenedModuleSnap.exists()) {
+              setLastOpenedModuleData(lastOpenedModuleSnap.data());
+              console.log("Last opened module data:", lastOpenedModuleData);
             }
           }
 
@@ -114,7 +165,7 @@ export default function ModuleOverview() {
     if (userId) {
       fetchCoursesWithProgress();
     }
-  }, [userId, selectedCategory]);
+  }, [userId, selectedCategory, lastOpenedModule, lastOpenedModuleData]);
 
   // Filter courses by category
   const handleCategorySelect = (category: string) => {
@@ -168,7 +219,15 @@ export default function ModuleOverview() {
 
         {/* Hero Section */}
         <Text style={styles.aboveHeroTitle}>Latest Learned</Text>
-        <View style={styles.heroContainer}>
+        <TouchableOpacity
+          style={styles.heroContainer}
+          onPress={() =>
+            router.push({
+              pathname: `/modules`,
+              params: { moduleId: lastOpenedModule.lastOpenedModule },
+            })
+          }
+        >
           <View style={styles.background}>
             <Image
               source={require("@/assets/images/python-logo.png")} // Replace with your illustration path
@@ -178,10 +237,16 @@ export default function ModuleOverview() {
           </View>
 
           <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>Module 1 - Python print</Text>
-            <Text style={styles.heroSubtitle}>Part 1 - 24 Minutes</Text>
+            <Text style={styles.heroTitle}>
+              {lastOpenedModuleData
+                ? lastOpenedModuleData.title
+                : "Start learning now!"}
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              {lastOpenedModuleData ? lastOpenedModuleData.description : ""}
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Filtered Courses Section */}
         <View style={styles.coursesContainer}>
@@ -315,5 +380,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 12,
+    width: "70%",
   },
 });

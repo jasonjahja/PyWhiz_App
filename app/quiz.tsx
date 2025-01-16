@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  ScrollView,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { doc, getDoc } from "firebase/firestore";
@@ -78,7 +79,7 @@ export default function QuizPage() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.widthcontainer}>
+      <ScrollView style={styles.widthcontainer}>
         {/* Header Section */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -193,7 +194,7 @@ export default function QuizPage() {
             <Icon name="chevron-forward" size={16} color="#fff" />
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
