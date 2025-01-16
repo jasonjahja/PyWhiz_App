@@ -24,6 +24,11 @@ interface Course {
   users: number;
 }
 
+function convertTimeToNumber(time: string) {
+  const [hours, minutes] = time.split(":").map((time) => parseInt(time, 10));
+  return hours * 60 + minutes;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const { user } = useUser();
@@ -37,14 +42,22 @@ export default function HomePage() {
     const fetchCourses = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "module")); // Replace 'modules' with your Firestore collection name
-        const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          image: doc.data().thumbnail || "", // Replace 'thumbnail' with your Firestore image field name
-          category: doc.data().category || "Unknown",
-          title: doc.data().title || "Untitled",
-          duration: doc.data().duration || 0, // Replace 'duration' with your Firestore duration field name
-          users: doc.data().users || 0, // Replace 'users' with your Firestore users field name
-        }));
+
+        const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => {
+          const videos = doc.data().videos || []; // Get the videos array, default to an empty array if not present
+          const totalDuration = videos.reduce((acc: number, video: any) => {
+            return acc + (convertTimeToNumber(video.duration) || 0); // Add up the duration of each video
+          }, 0); // Initial accumulator value is 0
+
+          return {
+            id: doc.id,
+            image: doc.data().thumbnail || "", // Replace 'thumbnail' with your Firestore image field name
+            category: doc.data().category || "Unknown",
+            title: doc.data().title || "Untitled",
+            duration: totalDuration, // Use the aggregated total duration
+            users: doc.data().users || 0, // Replace 'users' with your Firestore users field name
+          };
+        });
 
         setAllCourses(fetchedCourses);
 
