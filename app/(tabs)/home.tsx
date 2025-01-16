@@ -47,6 +47,20 @@ export default function HomePage() {
     return null;
   };
 
+  const convertTimeToMinutes = (time: string): number => {
+    if (!time) return 0;
+  
+    const parts = time.split(":").map(Number);
+    if (parts.length === 2) {
+      const [minutes, seconds] = parts;
+      return minutes + seconds / 60;
+    } else if (parts.length === 1) {
+      return parts[0];
+    }
+  
+    return 0;
+  };
+
   // Fetch courses from Firestore
   useEffect(() => {
     const fetchCourses = async () => {
@@ -61,7 +75,7 @@ export default function HomePage() {
             videos[0].url
           );
           const totalDuration = videos.reduce((acc: number, video: any) => {
-            return acc + (convertTimeToNumber(video.duration) || 0); // Add up the duration of each video
+            return acc + (convertTimeToMinutes(video.duration) || 0); // Add up the duration of each video
           }, 0); // Initial accumulator value is 0
 
           return {

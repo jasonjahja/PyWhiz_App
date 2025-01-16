@@ -34,6 +34,20 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
   const categoryStyle = getCategoryStyle();
 
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      const mins = Math.floor(minutes);
+      const secs = Math.floor(minutes % 60);
+      return `${mins} Min ${secs} Sec`;
+    } else if (minutes % 60 === 0) {
+      return `${Math.floor(minutes / 60)} Hour`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours} Hour${hours > 1 ? "s" : ""} ${mins} Min`;
+    }
+  };
+
   return (
     <TouchableOpacity style={styles.courseCard} onPress={onPress}>
       <Image source={image} style={styles.courseImage} />
@@ -61,7 +75,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             color="#888"
             style={styles.footerIcon}
           />
-          <Text style={styles.courseDuration}>{duration} Min</Text>
+          <Text style={styles.courseDuration}>{formatDuration(duration)}</Text>
         </View>
         <View style={styles.footerItem}>
           <Icon

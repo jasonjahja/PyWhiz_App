@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#4A4A4A", // Dark grayish-blue
+    color: "#4A4A4A",
   },
   profilePictureContainer: {
     alignItems: "center",

@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     justifyContent: "center", // Center the app vertically
   },
   scrollView: {
-    width: 375,
+    // width: 375,
     flex: 1,
   },
   scrollViewContent: {

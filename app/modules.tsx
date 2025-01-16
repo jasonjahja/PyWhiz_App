@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
-import { db } from "@/firebase"; // Ensure correct path to Firebase configuration
+import { db } from "@/firebase"; 
 import { useVideoPlayer, VideoView } from "expo-video";
 import Icon from "react-native-vector-icons/Ionicons";
 import VideoCard from "@/components/ui/VideoCard";
@@ -18,10 +18,10 @@ import imageMapping from "./imagemapping";
 
 export default function ModuleDetails() {
   const router = useRouter();
-  const { moduleId } = useGlobalSearchParams(); // Dynamically get moduleId from the route
+  const { moduleId } = useGlobalSearchParams(); 
   const [moduleData, setModuleData] = useState<any>(null);
   const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
-  const [userId, setUserId] = useState<string>("8hzRnSqWVZXH1zEIvm2Ayrps9442"); // Replace with authenticated user ID
+  const [userId, setUserId] = useState<string>("8hzRnSqWVZXH1zEIvm2Ayrps9442"); 
   const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
   const [currentVideoDetails, setCurrentVideoDetails] = useState<any>(null);
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
     web: {
       flex: 1,
       backgroundColor: "#fff",
-      alignItems: "center", // Center the app horizontally
-      justifyContent: "center", // Center the app vertically
+      alignItems: "center", 
+      justifyContent: "center", 
     },
     default: {
       flex: 1,
@@ -273,7 +273,8 @@ const styles = StyleSheet.create({
   moduleTitle: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "gray",
+    color: "#888",
+    marginBottom: 2,
   },
   videoTitle: {
     fontSize: 24,
@@ -306,13 +307,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   line: {
-    backgroundColor: "#3178C6",
-    width: "100%",
+    backgroundColor: '#ccc',
+    width: '100%',
     height: 3,
     borderRadius: 10,
     marginTop: 8,
     marginBottom: 14,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,

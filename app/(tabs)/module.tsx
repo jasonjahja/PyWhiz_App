@@ -12,6 +12,7 @@ import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "expo-router";
+import Icon from 'react-native-vector-icons/Ionicons';
 import StretchedCourseCard from "@/components/ui/StretchedCourseCards";
 
 type Course = {
@@ -28,7 +29,7 @@ type Course = {
 export default function ModuleOverview() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("Beginner");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -133,7 +134,18 @@ export default function ModuleOverview() {
       <ScrollView style={styles.scrollContainer}>
         {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.title}>Courses</Text>
+          {/* Back Button */}
+          <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+            <Icon name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+
+          {/* Title */}
+          <Text style={styles.title}>My Courses</Text>
+
+          {/* Search Button */}
+          <TouchableOpacity onPress={() => router.push('/search')} style={styles.iconButton}>
+            <Icon name="search-outline" size={24} color="#000" />
+          </TouchableOpacity>
         </View>
 
         {/* Categories Section */}
@@ -223,16 +235,20 @@ const styles = StyleSheet.create({
       marginTop: 54,
     },
   }),
+  // Header Section
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 28,
+  },
+  iconButton: {
+    padding: 8,
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#4A4A4A",
+    fontWeight: 'bold',
+    color: '#4A4A4A',
   },
   categoriesContainer: {
     marginBottom: 18,
