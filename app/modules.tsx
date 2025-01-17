@@ -99,24 +99,18 @@ export default function ModuleDetails() {
           const userProgressRef = doc(db, "user_progress", userId);
           const userProgressSnap = await getDoc(userProgressRef);
 
-          console.log(userProgressSnap.data());
-
           if (!userProgressSnap.exists()) {
             await setDoc(doc(db, "user_progress", userId), {
               lastOpenedModule: moduleId,
             });
-            console.log("Created User progress", userId, moduleId);
           } else {
             await updateDoc(doc(db, "user_progress", userId), {
               lastOpenedModule: moduleId,
             });
-            console.log("Updated User progress", userId, moduleId);
           }
         } catch (e) {
-          console.log("Error updating user last opened module", e);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -143,7 +137,6 @@ export default function ModuleDetails() {
         watchedVideos: updatedWatchedVideos,
       });
       setWatchedVideos(updatedWatchedVideos);
-      console.log(`Video ${videoId} marked as watched.`);
     } catch (error) {
       console.error("Error updating watched videos:", error);
     }
@@ -151,7 +144,6 @@ export default function ModuleDetails() {
 
   const markQuizAsCompleted = async () => {
     if (quizCompleted) {
-      console.log("Quiz is already marked as completed.");
       return;
     }
 
@@ -164,7 +156,6 @@ export default function ModuleDetails() {
     try {
       await updateDoc(progressRef, { quizCompleted: true });
       setQuizCompleted(true);
-      console.log("Quiz marked as completed.");
     } catch (error) {
       console.error("Error marking quiz as completed:", error);
     }

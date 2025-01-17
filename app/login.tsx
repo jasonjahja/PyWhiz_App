@@ -35,7 +35,6 @@ export default function LoginScreen() {
         email,
         password
       );
-      console.log("User logged in:", userCredential.user);
       Alert.alert("Success", "Logged in successfully!");
       router.replace("/(tabs)/home");
     } catch (error: any) {

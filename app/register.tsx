@@ -68,8 +68,6 @@ export default function RegisterScreen() {
         email,
         createdAt: new Date().toISOString(),
       });
-
-      console.log("User registered:", userCredential.user);
       Alert.alert("Success", "Account created successfully!");
       router.replace("/(tabs)/home");
     } catch (error: any) {

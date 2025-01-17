@@ -91,12 +91,6 @@ export default function ModuleOverview() {
               const userProgressData = userProgressSnap.data();
               watchedVideos = (userProgressData.watchedVideos || []).length;
               quizCompleted = userProgressData.quizCompleted || false;
-              console.log("Watched videos:", watchedVideos);
-              console.log("Quiz completed:", quizCompleted);
-            } else {
-              console.log(
-                `No progress found for user "${userId}" in module "${docSnap.id}".`
-              );
             }
 
             // last opened module data
@@ -107,20 +101,10 @@ export default function ModuleOverview() {
 
             const lastOpenedModule = userLastOpenedModuleSnap.data();
 
-            console.log(
-              "user last opened module",
-              userLastOpenedModuleSnap.data()
-            );
 
             if (userLastOpenedModuleSnap.exists()) {
               const data = userLastOpenedModuleSnap.data();
               setLastOpenedModule(data);
-
-              // get the data of the last opened module
-              console.log(
-                "last opened module",
-                lastOpenedModule?.lastOpenedModule
-              );
               const lastOpenedModuleRef = doc(
                 db,
                 "module",

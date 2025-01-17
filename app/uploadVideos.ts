@@ -171,7 +171,6 @@ const addVideosToFirestore = async () => {
     for (const [moduleId, videos] of Object.entries(modules)) {
       const moduleRef = doc(db, "module", moduleId); // Replace "module" with your Firestore collection name
       await updateDoc(moduleRef, { videos });
-      console.log(`Videos for module ${moduleId} added successfully.`);
     }
   } catch (error) {
     console.error("Error adding videos to Firestore:", error);

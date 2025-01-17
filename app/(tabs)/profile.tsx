@@ -48,8 +48,6 @@ export default function ProfileScreen() {
         setName(userData.displayName || "");
         setPhotoURL(userData.photoURL || "");
         setEmail(userData.email || user.email || "");
-      } else {
-        console.log("No user data found in Firestore.");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);

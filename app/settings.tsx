@@ -106,7 +106,6 @@ export default function SettingsPage() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => console.log("account management clicked!")} // Navigate to account management
           >
             <Icon
               name="settings-outline"

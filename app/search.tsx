@@ -88,8 +88,6 @@ export default function SearchScreen() {
           videos: doc.data().videos || [],
         }));
 
-        console.log(coursesData[0].videos);
-
         // Fetch user's progress data
         const userProgressSnapshot = await getDocs(
           collection(db, "user_module_progress")

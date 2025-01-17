@@ -16,7 +16,6 @@ const getCoursesFromDB = async () => {
       });
     });
 
-    console.log("Modules fetched from Firestore:", courses);
     return courses;
   } catch (error) {
     console.error("Error fetching modules from Firestore:", error);
@@ -34,7 +33,6 @@ const createUserModuleProgress = async (userId: string) => {
       return;
     }
 
-    console.log(`Creating progress for user: ${userId}`);
     for (const course of courses) {
       const userProgressRef = doc(
         db,
@@ -49,13 +47,6 @@ const createUserModuleProgress = async (userId: string) => {
           moduleId: course.id,
           watchedVideos: [], // Tidak ada video yang ditonton pada awalnya
         });
-        console.log(
-          `Initialized watchedVideos for user "${userId}" in module "${course.id}"`
-        );
-      } else {
-        console.log(
-          `Progress for user "${userId}" in module "${course.id}" already exists.`
-        );
       }
     }
   } catch (error) {
@@ -66,10 +57,7 @@ const createUserModuleProgress = async (userId: string) => {
 // Fungsi utama untuk mengelola pembuatan data awal
 export async function initializeUserProgress(userId: string): Promise<void> {
   try {
-    // Tambahkan ID pengguna di sini
-    console.log(`Initializing progress for user "${userId}"...`);
     await createUserModuleProgress(userId);
-    console.log("Initialization complete!");
   } catch (error) {
     console.error("Error initializing user progress:", error);
   }

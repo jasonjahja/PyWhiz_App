@@ -141,7 +141,6 @@ const submitMultipleQuizQuestions = async () => {
     });
 
     await Promise.all(batch);
-    console.log("All quiz questions submitted successfully!");
   } catch (error) {
     console.error("Error submitting quiz questions:", error);
   }

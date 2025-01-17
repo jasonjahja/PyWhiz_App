@@ -44,8 +44,6 @@ export default function HomePage() {
           const userData = doc.data();
           setPhotoURL(userData?.photoURL || null);
           setDisplayName(userData?.displayName || "Guest");
-        } else {
-          console.log("No user profile found in Firestore.");
         }
       }, (error) => {
         console.error("Error fetching user profile:", error);
