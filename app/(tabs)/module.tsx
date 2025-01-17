@@ -77,6 +77,7 @@ export default function ModuleOverview() {
           >;
 
           let watchedVideos = 0;
+          let quizCompleted = false;
 
           // Fetch user-specific progress for the module
           if (userId) {
@@ -90,7 +91,9 @@ export default function ModuleOverview() {
             if (userProgressSnap.exists()) {
               const userProgressData = userProgressSnap.data();
               watchedVideos = (userProgressData.watchedVideos || []).length;
+              quizCompleted = userProgressData.quizCompleted || false;
               console.log("Watched videos:", watchedVideos);
+              console.log("Quiz completed:", quizCompleted);
             } else {
               console.log(
                 `No progress found for user "${userId}" in module "${docSnap.id}".`
@@ -132,18 +135,20 @@ export default function ModuleOverview() {
             console.log("last opened module data", lastOpenedModuleSnap.data());
 
             if (lastOpenedModuleSnap.exists()) {
-              setLastOpenedModuleData(lastOpenedModuleSnap.data());
-              console.log("Last opened module data:", lastOpenedModuleData);
+              setLastOpenedModuleData(lastOpenedModuleSnap.data());              
             }
           }
+
+          const videoProgress =
+            (watchedVideos / courseData.totalVideos) * 90; // Video progress contributes 90%
+            const quizProgress = quizCompleted ? 10 : 0; // Quiz progress contributes 10%
+            const totalProgress = Math.round(videoProgress + quizProgress);
 
           fetchedCourses.push({
             id: docSnap.id,
             ...courseData,
             watchedVideos,
-            progress: Math.round(
-              (watchedVideos / courseData.totalVideos) * 100
-            ),
+            progress: totalProgress,
           });
 
           if (selectedCategory === "All") {
@@ -162,14 +167,6 @@ export default function ModuleOverview() {
         console.error("Error fetching courses or progress:", error);
       }
     };
-
-    const fetchLastOpenedModule = async () => {
-      if (userId) {
-      }
-    };
-
-    if (userId) {
-    }
 
     if (userId) {
       fetchCoursesWithProgress();

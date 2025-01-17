@@ -8,12 +8,11 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
-import { useRouter, useGlobalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
 import CourseCard from "@/components/ui/CourseCard";
-import { useUser } from "@/contexts/UserContext";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "@/firebase";
+import { collection, doc, getDoc, getDocs, onSnapshot } from "firebase/firestore";
+import { auth, db } from "@/firebase";
 import imageMapping from "../imagemapping";
 
 interface Course {
@@ -26,36 +25,49 @@ interface Course {
   videos: Array<any>;
 }
 
-function convertTimeToNumber(time: string) {
-  const [minutes, seconds] = time.split(":").map((time) => parseInt(time, 10));
-  return Math.floor(minutes + seconds / 60);
-}
-
 export default function HomePage() {
   const router = useRouter();
-  const { user } = useUser();
-  const [photoURL, setPhotoURL] = useState<string | null>(user?.photoURL || "");
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState("Guest");
   const [selectedCategory, setSelectedCategory] = useState<string>("Beginner");
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [filteredCourse, setFilteredCourse] = useState<Course | null>(null);
 
-  const fetchUserProfile = async () => {
-    if (user?.uid) {
-      try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+  const fetchUserProfile = () => {
+    const user = auth.currentUser; // Directly accessing the authenticated user
 
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          setPhotoURL(userData.photoURL || null);
+    if (user?.uid) {
+      const userRef = doc(db, "users", user.uid);
+
+      const unsubscribe = onSnapshot(userRef, (doc) => {
+        if (doc.exists()) {
+          const userData = doc.data();
+          setPhotoURL(userData?.photoURL || null);
+          setDisplayName(userData?.displayName || "Guest");
         } else {
           console.log("No user profile found in Firestore.");
         }
-      } catch (error) {
+      }, (error) => {
         console.error("Error fetching user profile:", error);
-      }
+      });
+
+      return unsubscribe; // Clean up the listener
     }
   };
+
+  // const convertTimeToMinutes = (time: string): number => {
+  //   if (!time) return 0;
+
+  //   const parts = time.split(":").map(Number);
+  //   if (parts.length === 2) {
+  //     const [minutes, seconds] = parts;
+  //     return minutes + seconds / 60;
+  //   } else if (parts.length === 1) {
+  //     return parts[0];
+  //   }
+
+  //   return 0;
+  // };
 
   const getImage = (fileName: string) => {
     if (imageMapping[fileName]) {
@@ -65,39 +77,23 @@ export default function HomePage() {
     return null;
   };
 
-  const convertTimeToMinutes = (time: string): number => {
-    if (!time) return 0;
-  
-    const parts = time.split(":").map(Number);
-    if (parts.length === 2) {
-      const [minutes, seconds] = parts;
-      return minutes + seconds / 60;
-    } else if (parts.length === 1) {
-      return parts[0];
-    }
-  
-    return 0;
-  };
-
-  // Fetch courses from Firestore
   useEffect(() => {
-    fetchUserProfile();
+    const unsubscribeUserProfile = fetchUserProfile();
+
     const fetchCourses = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "module")); // Replace 'modules' with your Firestore collection name
+        const querySnapshot = await getDocs(collection(db, "module")); // Replace 'module' with your Firestore collection name
 
         const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => {
           const videos = doc.data().videos || []; // Get the videos array, default to an empty array if not present
-          const totalDuration = videos.reduce((acc: number, video: any) => {
-            return acc + (convertTimeToMinutes(video.duration) || 0); // Add up the duration of each video
-          }, 0); // Initial accumulator value is 0
+          const firstVideoDuration = videos.length > 0 ? videos[0].duration || 0 : 0;
 
           return {
             id: doc.id,
             image: doc.data().thumbnail || "", // Replace 'thumbnail' with your Firestore image field name
             category: doc.data().category || "Unknown",
             title: doc.data().title || "Untitled",
-            duration: totalDuration, // Use the aggregated total duration
+            duration: firstVideoDuration, // Use the aggregated total duration
             users: doc.data().users || 0, // Replace 'users' with your Firestore users field name
             videos: doc.data().videos || [],
           };
@@ -116,6 +112,10 @@ export default function HomePage() {
     };
 
     fetchCourses();
+
+    return () => {
+      if (unsubscribeUserProfile) unsubscribeUserProfile();
+    }; // Clean up on unmount
   }, []);
 
   // Handle category selection
@@ -144,7 +144,7 @@ export default function HomePage() {
             <Text style={styles.greetingText}>
               Hello,{" "}
               <Text style={styles.userName}>
-                {user?.displayName || "Guest"}
+                {displayName || "Guest"}
               </Text>
             </Text>
           </View>

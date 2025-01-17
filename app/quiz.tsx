@@ -86,7 +86,7 @@ export default function QuizPage() {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Icon name="arrow-back" size={20} color="#000" />
+            <Icon name="chevron-back" size={20} color="#000" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
 

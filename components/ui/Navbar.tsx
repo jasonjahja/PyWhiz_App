@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { auth } from "@/firebase"; // Adjust path to your firebase configuration
+import { auth, db } from "@/firebase"; 
 import { useRouter } from "expo-router";
 import { ThemedText } from "../ThemedText";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -10,17 +11,29 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onIdTokenChanged((user) => {
+    const unsubscribeAuth = auth.onIdTokenChanged((user) => {
       if (user) {
         setIsAuthenticated(true);
-        setPhotoURL(user.photoURL || null); // Update the profile picture when it changes
+
+        // Set up Firestore listener for real-time updates
+        const userRef = doc(db, "users", user.uid);
+        const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setPhotoURL(userData.photoURL || null); // Update photoURL from Firestore
+          } else {
+            setPhotoURL(null);
+          }
+        });
+
+        return () => unsubscribeProfile();
       } else {
         setIsAuthenticated(false);
         setPhotoURL(null);
       }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, []);
 
   return (

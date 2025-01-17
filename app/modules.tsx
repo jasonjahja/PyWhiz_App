@@ -22,6 +22,7 @@ export default function ModuleDetails() {
   const { moduleId } = useGlobalSearchParams();
   const [moduleData, setModuleData] = useState<any>(null);
   const [watchedVideos, setWatchedVideos] = useState<number[]>([]);
+  const [quizCompleted, setQuizCompleted] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
@@ -82,12 +83,14 @@ export default function ModuleDetails() {
         if (progressSnap.exists()) {
           const progressData = progressSnap.data();
           setWatchedVideos(progressData.watchedVideos || []);
+          setQuizCompleted(progressData.quizCompleted || false);
         } else {
           // Initialize progress if it doesn't exist
           await setDoc(progressRef, {
             userId,
             moduleId,
             watchedVideos: [],
+            quizCompleted: false,
           });
         }
 
@@ -124,7 +127,7 @@ export default function ModuleDetails() {
 
   const markVideoAsWatched = async (videoId: number) => {
     if (watchedVideos.includes(videoId)) {
-      return; // If the video is already marked as watched, do nothing
+      return; 
     }
 
     const progressRef = doc(
@@ -143,6 +146,27 @@ export default function ModuleDetails() {
       console.log(`Video ${videoId} marked as watched.`);
     } catch (error) {
       console.error("Error updating watched videos:", error);
+    }
+  };
+
+  const markQuizAsCompleted = async () => {
+    if (quizCompleted) {
+      console.log("Quiz is already marked as completed.");
+      return;
+    }
+
+    const progressRef = doc(
+      db,
+      "user_module_progress",
+      `${userId}_${moduleId}`
+    );
+
+    try {
+      await updateDoc(progressRef, { quizCompleted: true });
+      setQuizCompleted(true);
+      console.log("Quiz marked as completed.");
+    } catch (error) {
+      console.error("Error marking quiz as completed:", error);
     }
   };
 
@@ -230,15 +254,26 @@ export default function ModuleDetails() {
 
       {/* Fixed Quiz Button */}
       <TouchableOpacity
-        style={styles.quizButton}
-        onPress={() =>
+        onPress={() => {
+          markQuizAsCompleted();
           router.push({
             pathname: `/quiz`,
             params: { moduleId: `${moduleId}` },
-          })
-        }
+          });
+        }}
+        disabled={watchedVideos.length < (moduleData.videos?.length || 0)} 
+        style={[
+          styles.quizButton,
+          watchedVideos.length < (moduleData.videos?.length || 0) && styles.disabledButton,
+        ]}
       >
-        <Text style={styles.quizButtonText}>Take A Quiz!</Text>
+        <Text style={styles.quizButtonText}>
+          {watchedVideos.length < (moduleData.videos?.length || 0)
+            ? "Watch All Videos to Access Quiz"
+            : quizCompleted 
+            ? "Retake Quiz!" 
+            : "Take A Quiz!"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -372,6 +407,9 @@ const styles = StyleSheet.create({
       borderRadius: 12,
     },
   }),
+  disabledButton: {
+    backgroundColor: "#CCC",
+  },
   quizButtonText: {
     fontSize: 18,
     fontWeight: "bold",
