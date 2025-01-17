@@ -26,22 +26,53 @@ export default function SettingsPage() {
     );
   };
 
+  const showAlert = ({
+    title,
+    message,
+    onConfirm,
+    onCancel,
+  }: {
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+  }) => {
+    if (Platform.OS === "web") {
+      // Web: Use window.confirm as an alternative
+      const confirmed = window.confirm(`${title}\n\n${message}`);
+      if (confirmed && onConfirm) onConfirm();
+      if (!confirmed && onCancel) onCancel();
+    } else {
+      // Mobile: Use Alert API
+      Alert.alert(
+        title,
+        message,
+        [
+          { text: "Cancel", onPress: onCancel, style: "cancel" },
+          { text: "OK", onPress: onConfirm },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
   const handleLogout = () => {
-    Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await signOut(auth);
-            router.replace("/login"); // Navigate to login page
-          } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to log out.");
-          }
-        },
+    showAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to log out?",
+      onConfirm: async () => {
+        try {
+          await signOut(auth);
+          signOut(auth);
+          router.replace("/");
+        } catch (error: any) {
+          showAlert({
+            title: "Error",
+            message: error.message || "Failed to log out.",
+          });
+        }
       },
-    ]);
+    });
   };
 
   return (

@@ -38,14 +38,14 @@ export default function ProfileScreen() {
 
   const handleEditPhoto = async () => {
     const user = auth.currentUser;
-  
+
     if (!user) {
       Alert.alert("Error", "No user is currently signed in.");
       return;
     }
-  
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
+
     if (status !== "granted") {
       Alert.alert(
         "Permission Denied",
@@ -53,26 +53,22 @@ export default function ProfileScreen() {
       );
       return;
     }
-  
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
       quality: 0.1, // Reduce quality to limit file size
       base64: true, // Include Base64 string in the result
     });
-  
+
     if (!result.canceled && result.assets[0].base64) {
       try {
         const base64Image = result.assets[0].base64;
         const userRef = doc(db, "users", user.uid);
-  
+
         // Save the Base64 string to Firestore
-        await setDoc(
-          userRef,
-          { photoBase64: base64Image },
-          { merge: true }
-        );
-  
+        await setDoc(userRef, { photoBase64: base64Image }, { merge: true });
+
         setTempPhotoURL(`data:image/jpeg;base64,${base64Image}`);
       } catch (error) {
         console.error("Error saving profile picture:", error);
@@ -80,7 +76,6 @@ export default function ProfileScreen() {
       }
     }
   };
-  
 
   const handleSaveChanges = async () => {
     const user = auth.currentUser;
@@ -118,13 +113,16 @@ export default function ProfileScreen() {
       // Update profile picture
       if (tempPhotoURL && tempPhotoURL !== photoURL) {
         try {
-          const base64PhotoURL = tempPhotoURL.replace(/^data:image\/\w+;base64,/, "");
+          const base64PhotoURL = tempPhotoURL.replace(
+            /^data:image\/\w+;base64,/,
+            ""
+          );
           await setDoc(
             userRef,
             { photoURL: base64PhotoURL }, // Save only the Base64 string
             { merge: true }
           );
-      
+
           setPhotoURL(base64PhotoURL); // Update local state
           setTempPhotoURL(null); // Clear temporary state
           Alert.alert("Success", "Profile picture updated successfully!");
@@ -133,7 +131,6 @@ export default function ProfileScreen() {
           Alert.alert("Error", "Failed to save profile picture.");
         }
       }
-      
 
       // If the user is trying to change the password
       if (password) {
@@ -146,7 +143,10 @@ export default function ProfileScreen() {
         }
 
         // Re-authenticate the user with their old password
-        const credential = EmailAuthProvider.credential(user.email!, oldPassword);
+        const credential = EmailAuthProvider.credential(
+          user.email!,
+          oldPassword
+        );
         await reauthenticateWithCredential(user, credential);
 
         // Update the password
@@ -169,7 +169,7 @@ export default function ProfileScreen() {
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to update profile.");
     }
-};
+  };
 
   const isSaveDisabled =
     user?.displayName === name &&
@@ -177,23 +177,54 @@ export default function ProfileScreen() {
     oldPassword === "" &&
     !tempPhotoURL;
 
+  const showAlert = ({
+    title,
+    message,
+    onConfirm,
+    onCancel,
+  }: {
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+  }) => {
+    if (Platform.OS === "web") {
+      // Web: Use window.confirm as an alternative
+      const confirmed = window.confirm(`${title}\n\n${message}`);
+      if (confirmed && onConfirm) onConfirm();
+      if (!confirmed && onCancel) onCancel();
+    } else {
+      // Mobile: Use Alert API
+      Alert.alert(
+        title,
+        message,
+        [
+          { text: "Cancel", onPress: onCancel, style: "cancel" },
+          { text: "OK", onPress: onConfirm },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
   const handleLogout = () => {
-    Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await signOut(auth);
-            setUser(null); // Clear the UserContext
-            router.replace("/");
-          } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to log out.");
-          }
-        },
+    showAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to log out?",
+      onConfirm: async () => {
+        try {
+          await signOut(auth);
+          setUser(null);
+          signOut(auth);
+          router.replace("/");
+        } catch (error: any) {
+          showAlert({
+            title: "Error",
+            message: error.message || "Failed to log out.",
+          });
+        }
       },
-    ]);
+    });
   };
 
   // Fetch user data from Firestore on component mount
