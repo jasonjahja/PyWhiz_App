@@ -68,9 +68,8 @@ export default function ModuleOverview() {
     const fetchCoursesWithProgress = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "module"));
-        const fetchedCourses: Course[] = [];
-
-        for (const docSnap of querySnapshot.docs) {
+        const fetchedCourses = await Promise.all(
+          querySnapshot.docs.map(async (docSnap) => {
           const courseData = docSnap.data() as Omit<
             Course,
             "id" | "watchedVideos" | "progress"
@@ -116,53 +115,52 @@ export default function ModuleOverview() {
             if (userLastOpenedModuleSnap.exists()) {
               const data = userLastOpenedModuleSnap.data();
               setLastOpenedModule(data);
-            }
 
-            console.log("Last opened module variable:", lastOpenedModule);
+              // get the data of the last opened module
+              console.log(
+                "last opened module",
+                lastOpenedModule?.lastOpenedModule
+              );
+              const lastOpenedModuleRef = doc(
+                db,
+                "module",
+                lastOpenedModule?.lastOpenedModule
+              );
+              const lastOpenedModuleSnap = await getDoc(lastOpenedModuleRef);
 
-            // get the data of the last opened module
-            console.log(
-              "last opened module",
-              lastOpenedModule?.lastOpenedModule
-            );
-            const lastOpenedModuleRef = doc(
-              db,
-              "module",
-              lastOpenedModule?.lastOpenedModule
-            );
-            const lastOpenedModuleSnap = await getDoc(lastOpenedModuleRef);
-
-            console.log("last opened module data", lastOpenedModuleSnap.data());
-
-            if (lastOpenedModuleSnap.exists()) {
-              setLastOpenedModuleData(lastOpenedModuleSnap.data());              
+              if (lastOpenedModuleSnap.exists()) {
+                setLastOpenedModuleData(lastOpenedModuleSnap.data());              
+              }
             }
           }
 
           const videoProgress =
-            (watchedVideos / courseData.totalVideos) * 90; // Video progress contributes 90%
-            const quizProgress = quizCompleted ? 10 : 0; // Quiz progress contributes 10%
+            courseData.totalVideos > 0
+              ? (watchedVideos / courseData.totalVideos) * 90
+              : 0;
+            const quizProgress = quizCompleted ? 10 : 0;
             const totalProgress = Math.round(videoProgress + quizProgress);
 
-          fetchedCourses.push({
+          return{
             id: docSnap.id,
             ...courseData,
             watchedVideos,
             progress: totalProgress,
-          });
+          };
+        })
+      );
+
+          setCourses(fetchedCourses);
 
           if (selectedCategory === "All") {
-            setCourses(fetchedCourses);
             setFilteredCourses(fetchedCourses);
           } else {
-            setCourses(fetchedCourses);
             setFilteredCourses(
               fetchedCourses.filter(
                 (course) => course.category === selectedCategory
               )
             );
           }
-        }
       } catch (error) {
         console.error("Error fetching courses or progress:", error);
       }
@@ -264,7 +262,7 @@ export default function ModuleOverview() {
                 : "Start learning now!"}
             </Text>
             <Text style={styles.heroSubtitle}>
-              {lastOpenedModuleData ? lastOpenedModuleData.description : ""}
+              {lastOpenedModuleData ? lastOpenedModuleData.description : "We will help you remember your last opened module by displaying it here!"}
             </Text>
           </View>
         </TouchableOpacity>
@@ -405,6 +403,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 12,
-    width: "70%",
+    width: "65%",
   },
 });

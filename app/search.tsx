@@ -90,33 +90,47 @@ export default function SearchScreen() {
 
         console.log(coursesData[0].videos);
 
-        // Fetch user's watchedVideos progress
+        // Fetch user's progress data
         const userProgressSnapshot = await getDocs(
           collection(db, "user_module_progress")
         );
-        const userProgressMap: Record<string, number[]> = {};
+        const userProgressMap: Record<
+          string,
+          { watchedVideos: number[]; quizCompleted: boolean }
+        > = {};
         userProgressSnapshot.docs.forEach((doc) => {
           const data = doc.data();
           if (data.userId === userId) {
-            userProgressMap[data.moduleId] = data.watchedVideos || [];
+            userProgressMap[data.moduleId] = {
+              watchedVideos: data.watchedVideos || [],
+              quizCompleted: data.quizCompleted || false,
+            };
           }
         });
 
         // Combine course and progress data
         const combinedCourses = coursesData.map((course) => {
-          const watchedVideos = userProgressMap[course.id]?.length || 0;
-          const progress =
+          const progressData = userProgressMap[course.id] || {
+            watchedVideos: [],
+            quizCompleted: false,
+          };
+          const watchedVideos = Array.isArray(progressData.watchedVideos)
+            ? progressData.watchedVideos.length
+            : 0;
+          const videoProgress =
             course.totalVideos > 0
-              ? Math.round((watchedVideos / course.totalVideos) * 100)
+              ? (watchedVideos / course.totalVideos) * 90
               : 0;
+          const quizProgress = progressData.quizCompleted ? 10 : 0;
+          const totalProgress = Math.round(videoProgress + quizProgress);
 
           return {
             id: course.id,
-            thumbnail: course.videos[0].url,
+            thumbnail: course.videos[0]?.url || "",
             title: course.title,
             category: course.category,
             videos: `${watchedVideos}/${course.totalVideos} Videos`,
-            progress,
+            progress: totalProgress,
           };
         });
 

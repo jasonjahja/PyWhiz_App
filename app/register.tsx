@@ -10,10 +10,11 @@ import {
   Platform,
 } from "react-native";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"; // Add updateProfile for setting the displayName
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/Ionicons";
 import { initializeUserProgress } from "./uploadProgress";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -22,7 +23,6 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
@@ -47,6 +47,8 @@ export default function RegisterScreen() {
         password
       );
 
+      const user = userCredential.user;
+
       // Update the user's display name
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
@@ -56,7 +58,16 @@ export default function RegisterScreen() {
         throw new Error("No user is currently signed in.");
       }
 
-      initializeUserProgress(auth.currentUser.uid); // Initialize user progress
+      initializeUserProgress(auth.currentUser.uid);
+
+      // Push user data to Firestore
+      const userRef = doc(db, "users", user.uid); // Reference to the users collection with user ID as the document ID
+      await setDoc(userRef, {
+        uid: user.uid,
+        displayName: name,
+        email,
+        createdAt: new Date().toISOString(),
+      });
 
       console.log("User registered:", userCredential.user);
       Alert.alert("Success", "Account created successfully!");

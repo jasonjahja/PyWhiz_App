@@ -9,7 +9,6 @@ import { View, StyleSheet, Image, Text } from 'react-native';
 
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/firebase'; 
-import { UserProvider } from '@/contexts/UserContext'; 
 import { Slot } from 'expo-router'; 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -50,18 +49,15 @@ export default function RootLayout() {
   }
 
   return (
-    // Wrap everything in UserProvider
-    <UserProvider>
-      <ThemeProvider
-        value={{
-          ...LightTheme,
-          dark: false,
-        }}
-      >
-        <Slot />
-        <StatusBar style="dark" />
-      </ThemeProvider>
-    </UserProvider>
+    <ThemeProvider
+      value={{
+        ...LightTheme,
+        dark: false,
+      }}
+    >
+      <Slot />
+      <StatusBar style="dark" />
+    </ThemeProvider>
   );
 }
 
